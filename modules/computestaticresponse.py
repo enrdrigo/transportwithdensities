@@ -174,6 +174,8 @@ def computestaticresponse(root, L, nk, temp):
 
     stdch = np.real(np.sqrt((va / (1 - 1 / d[0]) / d[0] / temp) ** 2))
     tpcch = np.real(a / (1 - 1 / d[0]) / d[0] / temp)
+    # divido la risposta in polarizzazione al gradiente di temperature per il valore asintotica della risposta in P a D:
+    # cosi' ho la risposta in D al gradiente di T. A questo punto divido ancora per la costante dielettrica: E/grad(T)!
     print('relative dielectric constant dipoles:', d[0])
     print('relative dielectric contant charges k_min:', 1/(1-d[1]))
 
