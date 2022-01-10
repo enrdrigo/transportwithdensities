@@ -48,7 +48,7 @@ def Ggeneratemod(nk):
 def Ggeneratemodall(nk, L):
     G = np.zeros((nk, 3))
     conta = 0
-    G[0] = np.array([0, 0, 0]) / L + 1.0e-7
+    G[0] = np.array([0, 0, 0]) / L + 2.335581758729501e-06 / 2 / np.pi
     nkp = int(np.power(nk, 1 / 3)) + 1
     for i in range(0, nkp):
         for j in range(0, nkp):
@@ -58,7 +58,7 @@ def Ggeneratemodall(nk, L):
                 if conta == nk:
                     Gmod = np.linalg.norm(G, axis=1)
                     return Gmod
-                G[conta] = np.array([i, j, k]) / L + 1.0e-7
+                G[conta] = np.array([i, j, k]) / L + 2.335581758729501e-06 / 2 / np.pi
 
     Gmod = np.linalg.norm(G, axis=1)
     return Gmod
