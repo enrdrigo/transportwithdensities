@@ -45,7 +45,7 @@ def Ggeneratemod(nk):
     return Gmod
 
 
-def Ggeneratemodall(nk):
+def Ggeneratemodall(nk, L):
     G = np.zeros((nk, 3))
     conta = 0
     G[0] = np.array([0, 0, 0])
@@ -58,7 +58,7 @@ def Ggeneratemodall(nk):
                 if conta == nk:
                     Gmod = np.linalg.norm(G, axis=1)
                     return Gmod
-                G[conta] = np.array([i, j, k])
+                G[conta] = np.array([i, j, k]) / L
 
     Gmod = np.linalg.norm(G, axis=1)
     return Gmod
@@ -78,10 +78,10 @@ def computestaticresponse(root, L, nk, temp):
     else:
         raise ValueError
 
-    fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 / (L ** 3 * 1.0e-30 * 1.38e-23 * temp * 8.854 * 1.0e-12))
-    face = (16.022 ** 2) * 1.0e5 / (L ** 3 * 1.38 * temp * 8.854)
+    fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 / (L[0] * L[1] * L[2] * 1.0e-30 * 1.38e-23 * temp * 8.854 * 1.0e-12))
+    face = (16.022 ** 2) * 1.0e5 / (L[0] * L[1] * L[2] * 1.38 * temp * 8.854)
 
-    xk = Ggeneratemodall(nk) * 2 * np.pi / L + np.sqrt(3.) * 1.0e-5 * 2 * np.pi / L
+    xk = Ggeneratemodall(nk, L) * 2 * np.pi + np.sqrt(3.) * 1.0e-7 * 2 * np.pi
 
     # xk = np.linspace(0, nk - 1, nk) * 2 * np.pi / L + np.sqrt(3.) * 1.0e-5 * 2 * np.pi / L
 
@@ -172,8 +172,10 @@ def computestaticresponse(root, L, nk, temp):
         plt.legend()
         plt.show(block=False)
 
-    stdch = np.real(np.sqrt((va / (1 - 1 / d[0]) / temp) ** 2))
-    tpcch = np.real(a / (1 - 1 / d[0]) / temp)
+    stdch = np.real(np.sqrt((va / (d[0]) / temp) ** 2))
+    tpcch = np.real(a / (d[0]) / temp)
+    print('relative dielectric constant dipoles:', d[0])
+    print('relative dielectric contant charges k_min:', 1/(1-d[1]))
 
     if plot:
         fig, ax = plt.subplots(1, figsize=(8, 6), constrained_layout=True)

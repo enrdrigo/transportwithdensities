@@ -49,9 +49,13 @@ def getBoxboundary(filename, root):
         for i in range(15):
             line = f.readline()
             if oldline == 'ITEM: BOX BOUNDS pp pp pp\n':
-                (Linf, Lmax) = (float(line.split()[0]), float(line.split()[1]))
+                (Linfx, Lmaxx) = (float(line.split()[0]), float(line.split()[1]))
                 f.close()
-                return Lmax - Linf, Linf
+                (Linfy, Lmaxy) = (float(line.split()[0]), float(line.split()[1]))
+                f.close()
+                (Linfz, Lmaxz) = (float(line.split()[0]), float(line.split()[1]))
+                f.close()
+                return np.array([Lmaxx - Linfx, Lmaxy - Linfy, Lmaxz - Linfz]) , Linfx
             oldline = line
 
 

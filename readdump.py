@@ -1,5 +1,5 @@
 import os
-from modules import traj
+from modules import trajnew
 from modules import initialize
 
 root = './'

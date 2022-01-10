@@ -1,5 +1,5 @@
 from modules import initialize
-from modules import computenltt
+from modules import computenlttnew
 import numpy as np
 import os
 
@@ -31,14 +31,18 @@ nltt, chi, corrk = computenlttnew.computenltt(inputcompute['root'], inputcompute
 
 np.save(root+'nltt.npy', nltt)
 
-xk = computenlttnew.Ggeneratemodall(nkpoints) * 2 * np.pi / (inputcompute['size']) #np.linspace(1, nkpoints, nkpoints-1)
+xk = computenlttnew.Ggeneratemodall(nkpoints, inputcompute['size']) * 2 * np.pi  #np.linspace(1, nkpoints, nkpoints-1)
 with open(root+'nlttk.out', '+w') as f:
     for i in range(nkpoints-1):
-        f.write('{}\t'.format(xk[i+1])+'{}\t'.format(np.real(np.mean(nltt[:, i, -1], axis=0)))
-                +'{}\t'.format(np.sqrt(np.var(nltt[:, i, -1], axis=0))/nltt.shape[0])
+        f.write('{}\t'.format(xk[i+1])+'{}\t'.format(np.real(np.mean(nltt[:, i, int(10/(deltat*tdump))], axis=0)))
+                +'{}\t'.format(np.sqrt(np.var(nltt[:, i, int(10/(deltat*tdump))], axis=0)/nltt.shape[0]))
                 +'{}\t'.format(chi[i+1])
-                +'{}\n'.format(np.real(np.mean(np.sum(corrk[:,i, :int(corrk.shape[2]/2)+1], axis=1)))))
+                +'{}\n'.format(np.real(np.mean(np.sum(corrk[:, i, :int(corrk.shape[2]/2)+1], axis=1)))))
 
 with open(root+'corren.out', 'w+') as f:
     for i in range(corrk.shape[2]):
         f.write('{}\t'.format(i)+'{}\t'.format(np.real(np.mean(corrk[:,0, i], axis=0)))+'{}\n'.format(np.real(np.mean(corrk[:,1, i], axis=0))))
+
+with open(root+'nlttkminvsT.out', 'w+') as f:
+    for i in range(nltt.shape[2]):
+        f.write('{}\t'.format(i)+'{}\n'.format(np.real(np.mean(nltt[:, 0, i], axis=0))))

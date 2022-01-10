@@ -33,7 +33,7 @@ def Ggeneratemod(nk):
     return Gmod
 
 
-def Ggeneratemodall(nk):
+def Ggeneratemodall(nk, L):
     G = np.zeros((nk, 3))
     conta = 0
     G[0] = np.array([0, 0, 0])
@@ -46,7 +46,7 @@ def Ggeneratemodall(nk):
                 if conta == nk:
                     Gmod = np.linalg.norm(G, axis=1)
                     return Gmod
-                G[conta] = np.array([i, j, k])
+                G[conta] = np.array([i, j, k]) / L
 
     Gmod = np.linalg.norm(G, axis=1)
     return Gmod
@@ -75,7 +75,7 @@ def computenltt(root, Np, L, nk, cp, deltat, tdump):
 
     tinblock = int(tblock / 2)
 
-    rho = Np / (6.022e23 * L ** 3 * 1.e-30)  # mol/m^3
+    rho = Np / (6.022e23 * L[0] * L[1] * L[2] * 1.e-30)  # mol/m^3
 
     fac = rho * cp  # J/k/m^3
 
@@ -91,7 +91,7 @@ def computenltt(root, Np, L, nk, cp, deltat, tdump):
 
     corrk = np.zeros((nblocks, nk-1, tinblock), dtype=np.complex_)
 
-    Gmod = Ggeneratemodall(nk)
+    Gmod = Ggeneratemodall(nk, L)
 
     for t in range(nblocks):
 
@@ -104,7 +104,7 @@ def computenltt(root, Np, L, nk, cp, deltat, tdump):
 
             chik = (np.var(enkcorr[j, :]))
 
-            ft[j - 1] = chik / (np.cumsum(corr[t, :int(tinblock / 2) + 1]) * (2 * Gmod[j] * np.pi / L) ** 2) * (
+            ft[j - 1] = chik / (np.cumsum(corr[t, :int(tinblock / 2) + 1]) * (2 * Gmod[j] * np.pi) ** 2) * (
                         fac / dt * (1e-10) ** 2 / 1e-12)
             corrk[t, j-1] = corr[t]
             #print(chik, corr[t,0])
