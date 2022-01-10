@@ -218,7 +218,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
 def Ggenerateall(nk, Np, L, natpermol):
     G = np.zeros((nk, 3))
     conta = 0
-    G[0] = np.array([0, 0, 0]) / L + 2.335581758729501e-06 / 2 / np.pi
+    G[0] = np.array([0, 0, 0]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
     nkp = int(np.power(nk, 1/3))+1
     for i in range(0, nkp):
         for j in range(0, nkp):
@@ -230,7 +230,7 @@ def Ggenerateall(nk, Np, L, natpermol):
                     return G[:, np.newaxis, :] * np.ones((nk, Np, 3)),\
                            G[:, np.newaxis, :] * np.ones((nk, int(Np / natpermol), 3)),\
                            Gmod[:, np.newaxis] * np.ones((nk, Np)), Gmod[:, np.newaxis] * np.ones((nk, int(Np / natpermol)))
-                G[conta] = np.array([i, j, k]) / L + 2.335581758729501e-06 / 2 / np.pi
+                G[conta] = np.array([i, j, k]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
 
     Gmod = np.linalg.norm(G, axis=1)
     return G[:, np.newaxis, :] * np.ones((nk, Np, 3)), G[:, np.newaxis, :] * np.ones((nk, int(Np / natpermol), 3)),\
