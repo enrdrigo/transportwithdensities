@@ -172,8 +172,8 @@ def computestaticresponse(root, L, nk, temp):
         plt.legend()
         plt.show(block=False)
 
-    stdch = np.real(np.sqrt((va / (d[0]) / temp) ** 2))
-    tpcch = np.real(a / (d[0]) / temp)
+    stdch = np.real(np.sqrt((va / (1 - 1 / d[0]) / d[0] / temp) ** 2))
+    tpcch = np.real(a / (1 - 1 / d[0]) / d[0] / temp)
     print('relative dielectric constant dipoles:', d[0])
     print('relative dielectric contant charges k_min:', 1/(1-d[1]))
 
