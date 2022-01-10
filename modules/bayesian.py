@@ -44,7 +44,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     x = grid[:N, :].T * 0.13484487571168569
     x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
-    betha =bethapar * (1 / sigma_noise) ** 2
+    betha = bethapar * (1 / sigma_noise) ** 2
 
     Phi, contanumpol = computephicubichandL(x, betha, M, nL=nLbp)
 
@@ -96,10 +96,8 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
         if abs(np.prod(li_vP0))<1.0e-100:
             if ifprintbestfit: print('determinante della martice delle armoniche cubiche minore di 1.0e-5, salto')
             continue
-        if ifbetha:
-            bethaP=240
-        else:
-            bethap0 = 1
+        
+        bethap0 = 1
         alpha0 = 1e-3
         delta_alphaP = 1
         delta_alphaP = 1
