@@ -230,7 +230,7 @@ def Ggenerateall(nk, Np, L, natpermol):
                     return G[:, np.newaxis, :] * np.ones((nk, Np, 3)),\
                            G[:, np.newaxis, :] * np.ones((nk, int(Np / natpermol), 3)),\
                            Gmod[:, np.newaxis] * np.ones((nk, Np)), Gmod[:, np.newaxis] * np.ones((nk, int(Np / natpermol)))
-                G[conta] = np.array([i, j, k]) / L
+                G[conta] = np.array([i, j, k]) / L + 1.0e-7
 
     Gmod = np.linalg.norm(G, axis=1)
     return G[:, np.newaxis, :] * np.ones((nk, Np, 3)), G[:, np.newaxis, :] * np.ones((nk, int(Np / natpermol), 3)),\
@@ -239,8 +239,8 @@ def Ggenerateall(nk, Np, L, natpermol):
 
 @njit(fastmath=True, parallel=False)
 def numbacomputekft(f1, f2, x1, x2, L, G, nk):
-    fk1 = [np.sum(f1 * np.exp(1j * 2 * np.sum(x1 * -(G[i] + 1.0e-7), axis=1) * np.pi)) for i in range(nk)]
-    fk2 = [np.sum(f2 * np.exp(1j * 2 * np.sum(x2 * -(G[i] + 1.0e-7), axis=1) * np.pi)) for i in range(nk)]
+    fk1 = [np.sum(f1 * np.exp(1j * 2 * np.sum(x1 * -G[i], axis=1) * np.pi)) for i in range(nk)]
+    fk2 = [np.sum(f2 * np.exp(1j * 2 * np.sum(x2 * -G[i], axis=1) * np.pi)) for i in range(nk)]
     return fk1, fk2
 
 
