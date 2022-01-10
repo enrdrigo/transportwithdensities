@@ -1,5 +1,5 @@
 from modules import initialize
-from modules import computestaticresponsenew
+from modules import computestaticresponse
 import os
 
 root = './'
@@ -18,6 +18,6 @@ temp = float(input('temperature:>'))
 
 natpermol = int(input('number of atoms per molecule:>'))
 
-staticresponse = computestaticresponsenew.computestaticresponse(inputcompute['root'], inputcompute['size'],
+staticresponse = computestaticresponse.computestaticresponse(inputcompute['root'], inputcompute['size'],
                                                              inputcompute['number of k'], temp)
 

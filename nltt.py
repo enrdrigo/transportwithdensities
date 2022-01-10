@@ -1,5 +1,5 @@
 from modules import initialize
-from modules import computenlttnew
+from modules import computenltt
 import numpy as np
 import os
 
@@ -26,12 +26,12 @@ deltat = float(input('time step in metal units:>\n'))
 tdump = int(input('dump interval:>\n'))
 
 
-nltt, chi, corrk = computenlttnew.computenltt(inputcompute['root'], inputcompute['N'], inputcompute['size'],
+nltt, chi, corrk = computenltt.computenltt(inputcompute['root'], inputcompute['N'], inputcompute['size'],
                                            inputcompute['number of k'],  cp, deltat, tdump)
 
 np.save(root+'nltt.npy', nltt)
 
-xk = computenlttnew.Ggeneratemodall(nkpoints, inputcompute['size']) * 2 * np.pi  #np.linspace(1, nkpoints, nkpoints-1)
+xk = computenltt.Ggeneratemodall(nkpoints, inputcompute['size']) * 2 * np.pi  #np.linspace(1, nkpoints, nkpoints-1)
 with open(root+'nlttk.out', '+w') as f:
     for i in range(nkpoints-1):
         f.write('{}\t'.format(xk[i+1])+'{}\t'.format(np.real(np.mean(nltt[:, i, int(10/(deltat*tdump))], axis=0)))

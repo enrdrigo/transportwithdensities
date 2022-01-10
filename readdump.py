@@ -1,5 +1,5 @@
 import os
-from modules import trajnew
+from modules import traj
 from modules import initialize
 
 root = './'
@@ -15,11 +15,11 @@ else:
     inputcompute = initialize.getinitialize(fileinit, root, posox, nkpoints, ntrysnap)
 
 
-trajnew.read_dump(inputcompute['root'], inputcompute['filename'],
+traj.read_dump(inputcompute['root'], inputcompute['filename'],
           inputcompute['N'], inputcompute['number of snapshots'])
 
 natpermol = int(input('number of atoms per molecule:>\n'))
 
-trajnew.computekftnumba(inputcompute['root'], inputcompute['N'],
+traj.computekftnumba(inputcompute['root'], inputcompute['N'],
                                inputcompute['size'], inputcompute['position of the ox'],
                                inputcompute['number of k'], inputcompute['number of snapshots'], natpermol)
