@@ -218,7 +218,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
 def Ggenerateall(nk, Np, L, natpermol):
     G = np.zeros((nk, 3))
     conta = 0
-    G[0] = np.array([0, 0, 0])
+    G[0] = np.array([0, 0, 0]) / L + 1.0e-7
     nkp = int(np.power(nk, 1/3))+1
     for i in range(0, nkp):
         for j in range(0, nkp):
