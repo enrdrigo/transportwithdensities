@@ -1,4 +1,3 @@
-import os
 from modules import traj
 from modules import initialize
 
@@ -9,16 +8,24 @@ fileinit = 'init.dat'
 posox = float(input('position of the oxy:>\n'))
 nkpoints = 100
 ntrysnap = -1
-if os.path.exists(root+filename):
-    inputcompute = initialize.getinitialize(filename, root, posox, nkpoints, ntrysnap)
-else:
-    inputcompute = initialize.getinitialize(fileinit, root, posox, nkpoints, ntrysnap)
 
+with open(root+fileinit, 'w') as f:
+    with open(root+filename, 'r') as g:
+        for i in range(10):
+            line = g.readline()
+            f.write('{}\n'.format(line))
+
+inputcompute = initialize.getinitialize(fileinit, root, posox, nkpoints, ntrysnap)
 
 traj.read_dump(inputcompute['root'], inputcompute['filename'],
           inputcompute['N'], inputcompute['number of snapshots'])
 
 natpermol = int(input('number of atoms per molecule:>\n'))
+
+with open(root+'param.dat', 'w') as f:
+    f.write('{}\n'.format(nkpoints))
+    f.write('{}\n'.format(posox))
+    f.write('{}\n'.format(natpermol))
 
 traj.computekftnumba(inputcompute['root'], inputcompute['N'],
                                inputcompute['size'], inputcompute['position of the ox'],

@@ -6,9 +6,13 @@ root = './'
 filename = 'dump1.1fs.lammpstrj'
 fileinit = 'init.dat'
 
-posox = float(input('position of the oxy:>'))
-nkpoints = 100
+with open('param.dat', 'r') as f:
+    nkpoints = int(f.readline())
+    posox = float(f.readline())
+    natpermol = int(f.readline())
+
 ntrysnap = -1
+
 if os.path.exists(root+filename):
     inputcompute = initialize.getinitialize(filename, root, posox, nkpoints, ntrysnap)
 else:
@@ -16,7 +20,6 @@ else:
 
 temp = float(input('temperature:>'))
 
-natpermol = int(input('number of atoms per molecule:>'))
 
 staticresponse = computestaticresponse.computestaticresponse(inputcompute['root'], inputcompute['size'],
                                                              inputcompute['number of k'], temp)
