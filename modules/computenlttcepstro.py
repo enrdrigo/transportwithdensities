@@ -2,6 +2,7 @@ import numpy as np
 from scipy import signal
 import pickle as pk
 import os
+from modules import computestaticresponse
 try:
     import sportran as st
 except ImportError:
@@ -102,17 +103,20 @@ def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1):
         j.cepstral_analysis()
         jf.cepstral_analysis()
         j.compute_acf()
+        chi = 0.5 * np.real(enka[:, k]) ** 2 + 0.5 * np.imag(enka[:, k]) ** 2 - np.mean(
+            0.5 * np.real(enka[:, k]) + 0.5 * np.imag(enka[:, k])) ** 2
+        v, b = computestaticresponse.stdblock(chi)
+        errrelchi=np.sqrt(v[int(15/20*len(v))])/(np.mean(chi))
         kpoints.append(2 * Gmod[k] * np.pi)
-        wcepstrum.append(j.acfm[0] / (jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
-            1e-10) ** 2 / 1e-12)
-        swcepstrum.append(j.dct.tau_std_Kmin / jf.dct.tau_Kmin * j.acfm[0] / (
-                    jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (1e-10) ** 2 / 1e-12)
-        print(k,2 * Gmod[k] * np.pi,
-              j.acfm[0] / (jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
-                  1e-10) ** 2 / 1e-12,
-              j.dct.tau_std_Kmin / jf.dct.tau_Kmin * j.acfm[0] / (
-                      jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (1e-10) ** 2 / 1e-12
-              )
+        tr = j.acfm[0] / (jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
+            1e-10) ** 2 / 1e-12
+        wcepstrum.append(tr)
+        ertr=np.sqrt((j.dct.tau_std_Kmin / jf.dct.tau_Kmin * tr)**2+(errrelchi*tr)**2)
+        swcepstrum.append(ertr)
+        print(k,
+              2 * Gmod[k] * np.pi,
+              tr,
+              ertr)
         os.remove(root + 'enk{}.dat'.format(k))
         print('0', start - time.time())
     return np.array(kpoints), np.array(wcepstrum), np.array(swcepstrum)
