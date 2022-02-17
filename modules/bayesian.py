@@ -26,12 +26,11 @@ def generatesorteddata(data, nk):
         grid[i][2] = dicg[data0sort[i]][2]
         sdata[0][i] = dicdata[data0sort[i]][0]
         sdata[1][i] = dicdata[data0sort[i]][1]
-        dicdata[data0sort[i]][0]
     print(grid[0], grid[1], grid[2])
     return sdata, grid
 
 
-def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, ifwarning=True, nLbp=1):
+def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, ifwarning=True, nLbp=0):
     # grid e' la griglia di punti k.
     # data sono i valori calcolati nella simualzione con la std dev dei dati.
     # M e' il grado massimo dei polinomi che considero.
@@ -67,7 +66,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     return mN, SN, y_infer, sy_infer, contanumpol
 
 
-def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprintfinal=False, nLbf=1):
+def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprintfinal=False, nLbf=0):
     # grid e' la griglia di punti k.
     # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
     # N e' il numero di dati nel fit.
@@ -98,7 +97,7 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
             continue
         
         bethap0 = 1
-        alpha0 = 1e-3
+        alpha0 = 1
         delta_alphaP = 1
         delta_alphaP = 1
         alphaP = alpha0
@@ -161,7 +160,7 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
     return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP
 
 
-def bayesianmodelprediction(grid, sdata, N, x_infer, ifprintmodpred=False, ifprintfinal=False, nLbmp=1):
+def bayesianmodelprediction(grid, sdata, N, x_infer, ifprintmodpred=False, ifprintfinal=False, nLbmp=0):
     # grid e' la griglia di punti k.
     # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
     # N e' il numero di dati nel fit.
@@ -256,7 +255,7 @@ def normalize(v, axi):
         return (v.T / norm).T
 
 
-def computephicubicL(x, betha0, M_v, nL=1):
+def computephicubicL(x, betha0, M_v, nL=0):
     Phi_vP = [np.ones((x.shape[1])) * np.sqrt(betha0)]
     contanumpol = 1
     PhiL = np.zeros((3, x.shape[1]))
@@ -293,7 +292,7 @@ def computephicubicL(x, betha0, M_v, nL=1):
 
     return Phi_vP, contanumpol
 
-def computephicubichandL(x, betha0, M_v, nL=1):
+def computephicubichandL(x, betha0, M_v, nL=0):
     Phi_vP = [np.ones((x.shape[1])) * np.sqrt(betha0)]
     contanumpol = 1
     PhiL = np.zeros((5, x.shape[1]))
@@ -326,7 +325,7 @@ def computephicubichandL(x, betha0, M_v, nL=1):
 
     return Phi_vP, contanumpol
 
-def computephicubicsfL(x, betha0, M_v, nL=2):
+def computephicubicsfL(x, betha0, M_v, nL=0):
     Phi_vP = [np.ones((x.shape[1])) * np.sqrt(betha0)]
     contanumpol = 1
     theta = np.linspace(0, np.pi, 1000)

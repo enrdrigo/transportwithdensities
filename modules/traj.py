@@ -5,11 +5,11 @@ from numba import njit
 import time
 import h5py
 import os
-#from nfft import nfft_adjoint
 
 
 def read_dump(root, filename, Np, ntry):
     with open(root + filename, 'r') as f:
+        print('ok')
 
         if os.path.exists(root + 'dump.h5'):
             with h5py.File('dump.h5', 'r') as dump:
@@ -26,7 +26,10 @@ def read_dump(root, filename, Np, ntry):
         d = []
         start = time.time()
 
+        print(f.name)
+
         for index, line in enumerate(f):
+
 
             if index < lenght * (Np + 9):
                 continue
@@ -147,9 +150,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
                 print('tempo calcolo funzioni', start3 - start2)
 
             enklist, chklist \
-                = numbacomputekft((en_at[:] - emp[:]), (ch_at[:]), \
-                                  posatomic[:, :], pos_at[:, :], \
-                                  L, G, nk)
+                = numbacomputekft((en_at[:] - emp[:]), (ch_at[:]), posatomic[:, :], pos_at[:, :], L, G, nk)
 
             # enklist = nfft_adjoint(posatomic[:,0]/L, (en_at[:]- emp[:]), Np)
 
