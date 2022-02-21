@@ -13,11 +13,11 @@ with open(root+fileinit, 'w') as f:
     with open(root+filename, 'r') as g:
         for i in range(10):
             line = g.readline()
-            f.write('{}\n'.format(line))
+            f.write('{}'.format(line))
 
 inputcompute = initialize.getinitialize(fileinit, root, posox, nkpoints, ntrysnap)
 
-traj.read_dump(inputcompute['root'], inputcompute['filename'],
+traj.read_dump(inputcompute['root'], filename,
           inputcompute['N'], inputcompute['number of snapshots'])
 
 natpermol = int(input('number of atoms per molecule:>\n'))
