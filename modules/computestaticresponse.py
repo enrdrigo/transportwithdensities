@@ -78,7 +78,7 @@ def computestaticresponse(root, L, nk, temp):
     else:
         raise ValueError
 
-    fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 / (L[0] * L[1] * L[2] * 1.0e-30 * 1.38e-23 * temp * 8.854 * 1.0e-12))
+    fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 / (L[0] * L[1] * L[2] * 1.0e-30 * 1.38e-23 * temp ** 2 * 8.854 * 1.0e-12))
     face = (16.022 ** 2) * 1.0e5 / (L[0] * L[1] * L[2] * 1.38 * temp * 8.854)
 
     xk = Ggeneratemodall(nk, L) * 2 * np.pi
@@ -106,13 +106,13 @@ def computestaticresponse(root, L, nk, temp):
         d[i] = np.mean((chk[i] / xk[i]) * np.conj(chk[i] / xk[i])) * face
 
     convergence1 = np.real((np.cumsum((enk[0][:] / xk[0]) * np.conj(chk[0][:] / xk[0])) * fac) / (
-            np.cumsum((chk[0][:] / xk[0]) * np.conj(chk[0][:] / xk[0])) * face) / temp)
+            np.cumsum((chk[0][:] / xk[0]) * np.conj(chk[0][:] / xk[0])) * face))
     convergence2 = np.real((np.cumsum((enk[1][:] / xk[1]) * np.conj(chk[1][:] / xk[1])) * fac) / (
-            np.cumsum((chk[1][:] / xk[1]) * np.conj(chk[1][:] / xk[1])) * face) / temp)
+            np.cumsum((chk[1][:] / xk[1]) * np.conj(chk[1][:] / xk[1])) * face))
     convergence3 = np.real((np.cumsum((enk[2][:] / xk[2]) * np.conj(chk[2][:] / xk[2])) * fac) / (
-            np.cumsum((chk[2][:] / xk[2]) * np.conj(chk[2][:] / xk[2])) * face) / temp)
+            np.cumsum((chk[2][:] / xk[2]) * np.conj(chk[2][:] / xk[2])) * face))
     convergence4 = np.real((np.cumsum((enk[3][:] / xk[3]) * np.conj(chk[3][:] / xk[3])) * fac) / (
-            np.cumsum((chk[3][:] / xk[3]) * np.conj(chk[3][:] / xk[3])) * face) / temp)
+            np.cumsum((chk[3][:] / xk[3]) * np.conj(chk[3][:] / xk[3])) * face))
 
     with open(root + 'convergence.out', '+w') as g:
         for i in range(1, len(enk[0]), 10):
@@ -172,8 +172,8 @@ def computestaticresponse(root, L, nk, temp):
         plt.legend()
         plt.show(block=False)
 
-    stdch = np.real(np.sqrt((va / (1 - 1 / d[0]) / d[0] / temp) ** 2))
-    tpcch = np.real(a / (1 - 1 / d[0]) / d[0] / temp)
+    stdch = np.real(np.sqrt((va / (1 - 1 / d[0]) / d[0] ) ** 2))
+    tpcch = np.real(a / (1 - 1 / d[0]) / d[0] )
     # divido la risposta in polarizzazione al gradiente di temperature per il valore asintotica della risposta in P a D:
     # cosi' ho la risposta in D al gradiente di T. A questo punto divido ancora per la costante dielettrica: E/grad(T)!
     print('relative dielectric constant dipoles:', d[0])
