@@ -145,15 +145,11 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
 
     if verbose=='high': print('la frequenza di Nynquist e`  ', j.Nyquist_f_THz )
 
-    fstar_THz = j.Nyquist_f_THz / 4
+    fstar_THz = 8#Âj.Nyquist_f_THz / 40
 
     if verbose=='high': print('resalmplo il periodogramma fino a fstar: ',  j.Nyquist_f_THz / 4)
 
     jf = j.resample(fstar_THz=fstar_THz)
-
-    if verbose=='high': print('Faccio l`analisi cepstrale sul periodogramma non filtrato')
-
-    j.cepstral_analysis()
 
     if verbose=='high': print('Faccio l`analisi cepstrale sul periodogramma filtrato')
 
@@ -162,6 +158,8 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
     if verbose=='high': print('calcolo l`autocorrelazione temporale della densita` di energia, '+
           'sto considerando parte reale e immaginaria come flussi indipendenti')
 
+    jf.filter_psd(PSD_FILTER_W=0.5, freq_units='THz')
+    print(jf.fpsd[0]/2)
     j.compute_acf()
 
     chi = 0.5 * np.real(enka[:, k]) ** 2 + 0.5 * np.imag(enka[:, k]) ** 2 - np.mean(
@@ -169,12 +167,14 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
 
     v, b = computestaticresponse.stdblock(chi)
 
-    errrelchi=np.sqrt(v[int(15/20*len(v))])/(np.mean(chi))
+    errrelchi=np.sqrt(v[int(19/20*len(v))])/(np.mean(chi))
 
     tr = j.acfm[0] / (jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
         1e-10) ** 2 / 1e-12
+    print(np.mean(chi), j.acfm[0])
+    print((jf.dct.tau_std_Kmin / jf.dct.tau_Kmin * tr), (errrelchi*tr))
 
-    ertr=np.sqrt((j.dct.tau_std_Kmin / jf.dct.tau_Kmin * tr)**2+(errrelchi*tr)**2)
+    ertr=np.sqrt((jf.dct.tau_std_Kmin / jf.dct.tau_Kmin * tr)**2+(errrelchi*tr)**2)
 
     print('kpoint ', k,
           'kvalue ', 2 * Gmod[k] * np.pi,
