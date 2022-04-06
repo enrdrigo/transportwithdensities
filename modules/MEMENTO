@@ -1,0 +1,1 @@
+In modules/ ho aggiunto il file che calcola le entalpie parziali. devo modificare la routine che calcola le trasformate di fourier perche' calcoli anche quelle delle densita' di particelle.
