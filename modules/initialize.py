@@ -55,7 +55,7 @@ def getBoxboundary(filename, root):
                 f.close()
                 (Linfz, Lmaxz) = (float(line.split()[0]), float(line.split()[1]))
                 f.close()
-                return np.array([Lmaxx - Linfx, Lmaxy - Linfy, Lmaxz - Linfz]) , Linfx
+                return np.array([Lmaxx - Linfx, Lmaxy - Linfy, Lmaxz - Linfz]), np.array([Linfx, Linfy, Linfz])
             oldline = line
 
 

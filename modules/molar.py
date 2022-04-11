@@ -1,91 +1,10 @@
 import numpy as np
-import pickle as pk
-from numba import njit
 import time
 import h5py
 import os
-import json
+from modules import initialize
 
-
-def read_dump(root, filename, Np, ntry):
-    with open(root + filename, 'r') as f:
-        print('ok')
-
-        if os.path.exists(root + 'dump.h5'):
-            with h5py.File('dump.h5', 'r') as dump:
-                snap = list(dump.keys())
-
-            lenght = len(snap)
-            print('THE LOADING WAS STOPPED AT THE SNAPSHOT: ', lenght)
-
-        else:
-            dump = h5py.File('dump.h5', 'a')
-            lenght = 0
-
-        dump = h5py.File(root + 'dump.h5', 'a')
-        d = []
-        start = time.time()
-
-        print(f.name)
-
-        for index, line in enumerate(f):
-
-            if index < lenght * (Np + 9):
-                continue
-
-            linesplit = line.split(' ')
-
-            if len(linesplit) != 7 and len(linesplit) != 8:
-                continue
-            dlist = [float(linesplit[i]) for i in range(7)]
-            d.append(dlist)
-
-            if (index + 1) % (Np + 9) == 0:
-
-                if len(d) == 0:
-                    print('END READ FILE')
-                    print('got ' + str((index + 1) // (Np + 9)) + ' snapshot')
-                    dump.close()
-                    return
-
-                elif len(d) != Np:
-
-                    print(len(d))
-                    print('STOP: THE SNAPSHOT ' + str((index + 1) // (Np + 9)) + ' DOES NOT HAVE ALL THE PARTICLES')
-                    print('got ' + '' + ' snapshot')
-                    dump.close()
-                    return
-
-                datisnap = np.array(d)
-                d = []
-                dump.create_dataset(str((index + 1) // (Np + 9)),
-                                    data=datisnap)  # compression for float do not work well
-                # print(index, (index + 1) / (Np + 9))
-
-                if (index + 1) // (Np + 9) + 3 == ntry * 3:
-                    print('number of total snapshots is', (index + 1) // (Np + 9) / 3)
-                    print('done')
-                    print('END READ. NO MORE DATA TO LOAD. SEE NTRY')
-                    dump.close()
-                    return
-
-                if (index + 1) // (Np + 9) + 3 == ntry * 3:
-                    print('number of total snapshots is', (index + 1) // (Np + 9))
-                    print('done')
-                    print('elapsed time: ', time.time() - start)
-                    print('END READ NTRY')
-                    dump.close()
-                    return
-
-        print('number of total snapshots is', (index + 1) // (Np + 9))
-        print('done')
-        print('elapsed time: ', time.time() - start)
-        print('END READ FILE GOOD')
-        dump.close()
-        return
-
-
-def molar(root, Np):
+def molar_old(root, Np):
     start = time.time()
     print(
         'la routine legge il file dump.h5 con posizioni SCALATE e le energie per atomo.\n Calcola i volumi parziali (un unita` del volume per particella) e le energie parziali.')
@@ -162,6 +81,94 @@ def molar(root, Np):
     print('relazione di eulero per l`energia parziale', enmean.mean() / Np, u.mean(axis=0).mean())
     print('elapsed time: ', time.time() - start)
     return v, u
+
+
+def molar(root, Np):
+    start = time.time()
+    print('La routine legge il file dump.h5 con posizioni NON SCALATE e le energie per atomo.\n ' +
+          'Calcola i volumi parziali (un unita` del volume per particella) e le energie parziali.')
+    if os.path.exists(root + 'dump.h5'):
+        pass
+    else:
+        raise ValueError('crea il file dump.h5!! con la routine read_dump')
+
+    L, L_min = initialize.getBoxboundary('dump1.1fs.lammpstrj', root)
+
+    with h5py.File(root + 'dump.h5', 'r') as dump:
+
+        snap = list(dump.keys())
+        energies = np.zeros((len(snap), 3))
+        enmean = np.zeros(len(snap))
+        N1 = np.zeros((len(snap), 3))
+        N2 = np.zeros((len(snap), 3))
+        fetta = {'x': 0, 'y': 1, 'z': 2}
+        portions = ['x', 'y', 'z']
+
+        for i in range(1, len(snap) + 1):
+
+            j = i - 1
+            dumpdata = dump[str(i)][()].T
+            enmean[j] = dumpdata[5].sum() + dumpdata[6].sum()
+            pos = wrappos(dumpdata[2:5], L, L_min)
+            posunw = dumpdata[2:5]
+
+            for s in portions:
+                sin = portions.index(s)
+                list_fetta = np.where(pos[fetta[s]] < 0.5)
+                energies[j, sin] = dumpdata[6][list_fetta].sum() + dumpdata[7][list_fetta].sum()
+                list_fetta_sp1 = list_fetta[0][np.where(dumpdata[1][list_fetta] == 1.)]
+                list_fetta_sp2 = list_fetta[0][np.where(dumpdata[1][list_fetta] == 2.)]
+                N1[j, sin] = len(list_fetta_sp1)
+                N2[j, sin] = len(list_fetta_sp2)
+
+    n1 = N1.mean(axis=0)
+    n2 = N2.mean(axis=0)
+    energy = energies.mean(axis=0)
+    delta = np.einsum('imn,lmn->ilmn', \
+                      np.array([N1 - n1, N2 - n2]), \
+                      np.array([N1 - n1, N2 - n2])).mean(axis=2)
+
+    x = np.array([n1 / (n1 + n2), n2 / (n1 + n2)]).transpose((1, 0))
+    alpha = np.einsum('lm,ilm->ilm', \
+                      energies - energy, \
+                      np.array([N1 - n1, N2 - n2])).mean(axis=1).transpose((1, 0))
+
+    dinv = np.linalg.inv(delta.transpose((2, 0, 1)))
+    den = np.einsum('ij,ik,ijk->i', \
+                    x, \
+                    x, \
+                    dinv) ** -1
+
+    # partial molar volumes, in unita' di volume per particella
+    v = np.einsum('il,i->il', \
+                  np.einsum('ilm,il->im', \
+                            dinv, \
+                            x), \
+                  den)
+
+    # partial molar energies
+    u = np.einsum('i,il->il', \
+                  energy / (n1 + n2), \
+                  v) + \
+        np.einsum('ab,abc->ac', \
+                  alpha, \
+                  dinv - np.einsum('abc,a->abc', \
+                                   np.einsum('ab,abc,ad,adf->acf', \
+                                             x, \
+                                             dinv, \
+                                             x, \
+                                             dinv), \
+                                   den))
+
+    print('volumi parizali', v.mean(axis=0), np.sum(v.mean(axis=0) * x.mean(axis=0)))
+    print('energie parziali', u.mean(axis=0))
+    print('relazione di eulero per l`energia parziale', enmean.mean() / Np, np.sum(u.mean(axis=0) * x.mean(axis=0)))
+    print('elapsed time: ', time.time() - start)
+    return v, u
+
+
+def wrappos(posunw, L, L_min):
+    return (np.mod((posunw.T - L_min), L) / L).T
 
 
 def read_log_lammps(root):
