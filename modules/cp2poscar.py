@@ -456,7 +456,7 @@ def write_xyz(outfile, data, natoms_per_type, type_names=None, type_array=None, 
                         for idat in listat:
                             g.write(' {} {} {} \n'.format(POS[itimestep, idat, 0],
                                                           POS[itimestep, idat, 1],
-                                                          POS[itimestep, idat, 2] \
+                                                          POS[itimestep, idat, 2]
                                                           ))
 
     if raw:

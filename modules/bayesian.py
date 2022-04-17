@@ -26,7 +26,7 @@ def generatesorteddata(data, nk):
         grid[i][2] = dicg[data0sort[i]][2]
         sdata[0][i] = dicdata[data0sort[i]][0]
         sdata[1][i] = dicdata[data0sort[i]][1]
-    print(grid[0], grid[1], grid[2])
+
     return sdata, grid
 
 

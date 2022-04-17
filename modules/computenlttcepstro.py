@@ -3,6 +3,8 @@ from scipy import signal
 import pickle as pk
 import os
 from modules import computestaticresponse
+import sys
+sys.path.append('/Users/enricodrigo/Documents/LAMMPS/sportran/')
 try:
     import sportran as st
 except ImportError:
@@ -145,9 +147,9 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
 
     if verbose=='high': print('la frequenza di Nynquist e`  ', j.Nyquist_f_THz )
 
-    fstar_THz = 8#Âj.Nyquist_f_THz / 40
+    fstar_THz = 4#ï¿½j.Nyquist_f_THz / 40
 
-    if verbose=='high': print('resalmplo il periodogramma fino a fstar: ',  j.Nyquist_f_THz / 4)
+    if verbose=='high': print('resalmplo il periodogramma fino a fstar: ',  fstar_THz)
 
     jf = j.resample(fstar_THz=fstar_THz)
 
@@ -159,7 +161,7 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
           'sto considerando parte reale e immaginaria come flussi indipendenti')
 
     jf.filter_psd(PSD_FILTER_W=0.5, freq_units='THz')
-    print(jf.fpsd[0]/2)
+    #print(jf.fpsd[0]/2)
     j.compute_acf()
 
     chi = 0.5 * np.real(enka[:, k]) ** 2 + 0.5 * np.imag(enka[:, k]) ** 2 - np.mean(
@@ -169,17 +171,17 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
 
     errrelchi=np.sqrt(v[int(19/20*len(v))])/(np.mean(chi))
 
-    tr = j.acfm[0] / (jf.dct.tau_Kmin * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
+    tr = j.acfm[0] / (jf.cepf.tau_cutoffK * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
         1e-10) ** 2 / 1e-12
-    print(np.mean(chi), j.acfm[0])
-    print((jf.dct.tau_std_Kmin / jf.dct.tau_Kmin * tr), (errrelchi*tr))
+    #print(np.mean(chi), j.acfm[0])
+    #print((jf.cepf.tau_std_cutoffK / jf.cepf.tau_cutoffK * tr), (errrelchi*tr))
 
-    ertr=np.sqrt((jf.dct.tau_std_Kmin / jf.dct.tau_Kmin * tr)**2+(errrelchi*tr)**2)
+    ertr=np.sqrt((jf.cepf.tau_std_cutoffK / jf.cepf.tau_cutoffK * tr)**2+(errrelchi*tr)**2)
 
     print('kpoint ', k,
-          'kvalue ', 2 * Gmod[k] * np.pi,
-          'D(k)', tr,
-          'std D(k)', ertr)
+          '\nkvalue ', 2 * Gmod[k] * np.pi *10, '1/nm',
+          '\nD(k)', tr, 'W/mK',
+          '\nstd D(k)', ertr, 'W/mK')
 
     os.remove(root + 'enk{}.dat'.format(k))
     print('DONE CALCULATION OF D(K), elapsed time:', -start + time.time())
