@@ -245,7 +245,7 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nbloks, UNITS='real
           h.mean(axis=1).mean(axis=0)[0]*x.mean(axis=1).mean(axis=0)[0] + h.mean(axis=1).mean(axis=0)[1] *x.mean(axis=1).mean(axis=0)[1],
           (np.mean(dic_data_log['TotEng']) + np.mean(dic_data_log['Press']) * volume * fac) / Np)
 
-    print('errore entalpia parziali %', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
+    print('errore entalpia parziali', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
     print('Elapsed time', time.time() - start)
     print('End molar_enthalpy routine')
 
