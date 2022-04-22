@@ -1,5 +1,11 @@
 6/4/2022
-In modules/ ho aggiunto il file che calcola le entalpie parziali. devo modificare la routine che calcola le trasformate di fourier perche' calcoli anche quelle delle densita' di particelle.
-Quando dovro' fare il liquido ionico posso solo fissare un atomo? Altrimenti farei tutto con la posizione del centro di massa ma non dovrebbe cambiare nulla...
+In modules/ ho aggiunto il file che calcola le entalpie parziali. devo modificare la routine che calcola le trasformate
+di fourier perche' calcoli anche quelle delle densita' di particelle.
+Quando dovro' fare il liquido ionico posso solo fissare un atomo? Altrimenti farei tutto con la posizione del centro di
+massa ma non dovrebbe cambiare nulla...
 11/4/2022
-9Ho modificato la routine computekftnumba per calcolare anche le densita' di particelle, per ora solo con due specie. per generalizzare bsogna pensarci. Ho modificato molar per poter dare in input posizioni non scalate, cosi` e` piu` generale
+9Ho modificato la routine computekftnumba per calcolare anche le densita' di particelle, per ora solo con due specie.
+per generalizzare bsogna pensarci. Ho modificato molar per poter dare in input posizioni non scalate, cosi` e` piu` generale
+22/4/2022
+Ho aggiunto il file tools dove ci sono la g(r) e il msd parallelizzati in modo carino. in seebeck_work ho il contenuto
+ del notebook su marconi dove studiavo il KCl. sto rifacendo i conti perche' sto KCl non si era dissociato, colpa mia
