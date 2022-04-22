@@ -157,7 +157,7 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
     if ifprintfinal: print('best alpha', alpha_vP[index])
     if ifprintfinal: print('best betha', betha_vP[index])
 
-    return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP
+    return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP, Mv_list
 
 
 def bayesianmodelprediction(grid, sdata, N, x_infer, ifprintmodpred=False, ifprintfinal=False, nLbmp=0):

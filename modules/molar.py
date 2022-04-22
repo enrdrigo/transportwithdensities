@@ -12,7 +12,9 @@ def read_log_lammps(root, filename):
     print('Start read_log_lammps routine')
     start = time.time()
     print(
-        'Inizio la lettura del file log.lammps per le quantita` globali come energia totale, pressione temperatura \n o entalpia. In output verra scritto un file python ' + root + 'log.lammps.npy' + ' con un dizionario')
+        'Inizio la lettura del file log.lammps per le quantita` globali come energia totale, pressione temperatura \n' +
+        ' o entalpia. In output verra scritto un file python '
+        + root + filename +'.npy' + ' con un dizionario')
     datadic = {}
     with open(root + filename, 'r') as f:
 
