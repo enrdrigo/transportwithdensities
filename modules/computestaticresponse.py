@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 
+
 def stdblock(array):
     var = list()
     binsize = list()
@@ -80,7 +81,6 @@ def computestaticresponse(root, L, nk, temp):
 
     fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 / (L[0] * L[1] * L[2] * 1.0e-30 * 1.38e-23 * temp ** 2 * 8.854 * 1.0e-12))
     face = (16.022 ** 2) * 1.0e5 / (L[0] * L[1] * L[2] * 1.38 * temp * 8.854)
-
     xk = Ggeneratemodall(nk, L) * 2 * np.pi
 
     # xk = np.linspace(0, nk - 1, nk) * 2 * np.pi / L + np.sqrt(3.) * 1.0e-5 * 2 * np.pi / L

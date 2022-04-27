@@ -82,9 +82,9 @@ def msdloop(dump, pos0, lenght, i):
     list1 = np.where(dumpdata[1] == 1.)
     list2 = np.where(dumpdata[1] == 2.)
     pos = dumpdata[2:5]
-    dist1 = np.linalg.norm(pos - pos0, axis=0)[list1].mean()
-    dist2 = np.linalg.norm(pos - pos0, axis=0)[list2].mean()
-    dist = np.linalg.norm(pos - pos0, axis=0).mean()
+    dist1 = (np.linalg.norm(pos - pos0, axis=0)[list1]**2).mean()
+    dist2 = (np.linalg.norm(pos - pos0, axis=0)[list2]**2).mean()
+    dist = (np.linalg.norm(pos - pos0, axis=0)**2).mean()
     return np.array([dist1, dist2, dist])
 
 
