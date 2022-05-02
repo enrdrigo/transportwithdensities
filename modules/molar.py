@@ -145,7 +145,8 @@ def molar(root, filename, Np, nblocks):
         try:
             dinv = np.linalg.inv(delta.transpose((2, 0, 1)))
         except:
-            print(delta.transpose((2, 0, 1)))
+            print('block number', b)
+            print('number of particle per species', N1b, N2b)
             raise ValueError('Singular matrix!')
 
 
@@ -201,7 +202,7 @@ def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T
 
 
-def molar_enthalpy(root, filename, filename_log, volume, Np, nbloks, UNITS='metal'):
+def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='metal'):
     print('Start molar_enthalpy routine')
     start=time.time()
     volumepp = volume / Np
@@ -216,7 +217,7 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nbloks, UNITS='meta
     v, u, x = molar(root,
                  filename,
                  Np,
-                 nbloks)
+                 nblocks)
 
     warnings.warn('conversione atm*\AA**3_to_Kcal/mol, lammps real units')
     warnings.warn('disponibile anche conversione bar*\AA**3_to_eV, lammps metal units')
@@ -230,11 +231,11 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nbloks, UNITS='meta
 
     h = u + np.mean(dic_data_log['Press']) * volumepp * v * fac
 
-    eru = u.mean(axis=1).std(axis=0) / u.mean(axis=1).mean(axis=0) / np.sqrt(3 * nbloks)
+    eru = u.mean(axis=1).std(axis=0) / u.mean(axis=1).mean(axis=0) / np.sqrt(3 * nblocks)
     print('errore relativo percentuale energie parziali %',
           eru / u.mean(axis=1).mean(axis=0) * 100)
 
-    errvol = v.mean(axis=1).std(axis=0) / v.mean(axis=1).mean(axis=0) / np.sqrt(3 * nbloks)
+    errvol = v.mean(axis=1).std(axis=0) / v.mean(axis=1).mean(axis=0) / np.sqrt(3 * nblocks)
     print('errore relativo percentuale volumi parziali %',
           errvol * 100)
 

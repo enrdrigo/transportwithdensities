@@ -7,7 +7,7 @@ import pickle as pk
 
 
 def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, filename_loglammps='log.lammps',
-            plot=False, UNITS='metal'):
+            plot=False, UNITS='metal', nblocks=12):
     inp = initialize.getinitialize(filename=filename,
                                    root=root,
                                    posox=posox,
@@ -27,7 +27,7 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
                               filename_log=filename_loglammps,
                               volume=inp['size'].prod(),
                               Np=inp['N'],
-                              nbloks=12,
+                              nblocks=nblocks,
                               UNITS=UNITS)
 
     h = hp.mean(axis=0).mean(axis=0)
