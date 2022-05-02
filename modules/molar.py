@@ -145,6 +145,10 @@ def molar(root, filename, Np, nblocks):
         try:
             dinv = np.linalg.inv(delta.transpose((2, 0, 1)))
         except:
+            print('probabilmente quello che e` successo e` che nel blocco in una fetta non e` mai cambiato il numero' +
+                  ' di atomi  per una specie. puoi provare a dimunuire il numero di blocchi, cosi` e` piu` probabile' +
+                  ' che almeno in un istante ci sia una fluttuazione. se non migliora allunga la traiettoria o aumenta'+
+                  ' il numero di atomi.')
             print('block number', b)
             print('number of particle per species', N1b, N2b)
             raise ValueError('Singular matrix!')
