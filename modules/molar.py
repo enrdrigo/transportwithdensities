@@ -142,7 +142,12 @@ def molar(root, filename, Np, nblocks):
 
         #la funzione di inversione di matrici permette di fare l'inversione vettoriale di una lista di matrici, l'indice della matrice sara` il primo
         #ex. (N, M, M). dinv ha le dimensioni, #fetta, #specie, #specie
-        dinv = np.linalg.inv(delta.transpose((2, 0, 1)))
+        try:
+            dinv = np.linalg.inv(delta.transpose((2, 0, 1)))
+        except:
+            print(delta.transpose((2, 0, 1)))
+            raise ValueError('Singular matrix!')
+
 
         #i inisice di fetta, j indice di specie, k indice di specie.  den ha le dimensioni di #fetta
         den = np.einsum('ij,ik,ijk->i',
@@ -196,7 +201,7 @@ def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T
 
 
-def molar_enthalpy(root, filename, filename_log, volume, Np, nbloks, UNITS='real'):
+def molar_enthalpy(root, filename, filename_log, volume, Np, nbloks, UNITS='metal'):
     print('Start molar_enthalpy routine')
     start=time.time()
     volumepp = volume / Np
