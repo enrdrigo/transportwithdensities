@@ -2,7 +2,7 @@ from modules import traj
 from modules import initialize
 
 root = './'
-filename = 'dump1.1fs.lammpstrj'
+filename = str(input('filename:>\n'))
 fileinit = 'init.dat'
 
 posox = float(input('position of the oxy:>\n'))
