@@ -7,6 +7,65 @@ from modules import initialize
 from multiprocessing import Pool
 import os
 
+def stdblock(array):
+    var = list()
+    binsize = list()
+    nbino = 0
+    for i in range(1, int(len(array) / 10)):
+        nbin = int(len(array) / i)
+        if nbin == nbino:
+            continue
+        rarray = np.reshape(array[:nbin * i], (nbin, i))
+        barray = np.zeros(nbin, dtype=np.complex_)
+        barray = np.sum(rarray, axis=1) / i
+        var.append(np.var(barray) / nbin)
+        binsize.append(i)
+        nbino = nbin
+
+    return np.array(var), np.array(binsize)
+
+def Ggeneratemod(nk):
+    G = np.zeros((nk, 3))
+    conta = 0
+    i1 = 1
+    i2 = 0
+    i3 = 0
+    G[0] = np.array([0, 0, 0])
+    for i in range(1, nk):
+        G[i] = np.array([i1, i2, i3])
+        if G[i][0] != G[i][1] and G[i][1] == G[i][2]:
+            i2 += 1
+            if G[i][0] != G[i][1] and G[i][1] != G[i][2]:
+                i3 += 1
+        else:
+            if G[i][1] != G[i][2]:
+                i3 += 1
+        if G[i][0] == G[i][1] and G[i][0] == G[i][2]:
+            i1 += 1
+            i2 = 0
+            i3 = 0
+    Gmod = np.linalg.norm(G, axis=1)
+    return Gmod
+
+
+def Ggeneratemodall(nk, L):
+    G = np.zeros((nk, 3))
+    conta = 0
+    G[0] = np.array([0, 0, 0]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
+    nkp = int(np.power(nk, 1 / 3)) + 1
+    for i in range(0, nkp):
+        for j in range(0, nkp):
+            for k in range(0, nkp):
+                if i==0 and j==0 and k==0 : continue
+                conta += 1
+                if conta == nk:
+                    Gmod = np.linalg.norm(G, axis=1)
+                    return Gmod
+                G[conta] = np.array([i, j, k]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
+
+    Gmod = np.linalg.norm(G, axis=1)
+    return Gmod
+
 
 def msd(dump, pos0, lenght):
     dist1 = np.zeros(lenght)
@@ -165,11 +224,15 @@ def gorloop(dump, L, ngrid, lenght, r, i):
     return np.array([gor1t, gor2t, gor12t])
 
 
-def gor_parallel(root='./', filename='dump.lammpstrj', nblockstraj=10, timeskip=10, ngridd=100, ncpus=os.cpu_count()):
+def gor_parallel(root='./', filename='dump.lammpstrj', nblockstraj=10, timeskip=10, ngridd=100, ncpus=os.cpu_count(), Lgr=0):
     print('ncpus machine', os.cpu_count())
 
     L, Linf = initialize.getBoxboundary(filename, root)
-    r = np.linspace(0.01, L[0] / 2, ngridd)
+    if Lgr==0:
+        rmax = L[0] / 2
+    else:
+        rmax=Lgr
+    r = np.linspace(0.01, rmax, ngridd)
     ngrid = ngridd - 1
     with h5py.File(root + 'dump.h5', 'r') as dump:
         listasnap = []
