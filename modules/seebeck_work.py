@@ -92,6 +92,8 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
         ax[2].legend()
         ax[2].set_xlabel(r'k [$nm^{-1}$]')
         ax[2].set_ylabel(r'S [$\frac{V}{K}$]')
+    print('static dielectric constant')
+    print((np.mean((chk) * np.conj(chk), axis=0) / G ** 2)[0:1])
 
     with open(inp['root'] + 'seebeck.out', 'w') as f:
         for i in range(chk.shape[1] - 1):
