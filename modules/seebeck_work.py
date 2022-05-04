@@ -64,6 +64,8 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
                (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))
 
     face = (16.022 ** 2) * 1.0e-30 / (inp['size'].prod() * 1.38 * 1.38e-23 * log['Temp'].mean() * 8.854 * 1.0e-12)
+    print('static dielectric constant')
+    print((np.mean((chk) * np.conj(chk), axis=0) / G ** 2)[0:2] * face)
 
     a = (np.mean((enk) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     b = -(np.mean((n1k * h[0] + n2k * h[1]) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
@@ -94,8 +96,7 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
         ax[2].legend()
         ax[2].set_xlabel(r'k [$nm^{-1}$]')
         ax[2].set_ylabel(r'S [$\frac{V}{K}$]')
-    print('static dielectric constant')
-    print((np.mean((chk) * np.conj(chk), axis=0) / G ** 2)[0:2]*face )
+
 
     with open(inp['root'] + 'seebeck.out', 'w') as f:
         for i in range(chk.shape[1] - 1):
