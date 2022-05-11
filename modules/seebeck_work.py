@@ -67,6 +67,8 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
     print('static dielectric constant')
     print((np.mean((chk) * np.conj(chk), axis=0) / G ** 2)[0] * face)
 
+    np.save(root+'convergenceenergy_charge.npy', (((enk) * np.conj(chk))/ G ** 2)[1:] * fac)
+    np.save(root + 'convergenceseebeck.npy', (((enk) * np.conj(chk) - n1k * h[0] + n2k * h[1]) / G ** 2)[1:] * fac)
     a = (np.mean((enk) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     b = -(np.mean((n1k * h[0] + n2k * h[1]) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     for i in range(1, chk.shape[1]):
