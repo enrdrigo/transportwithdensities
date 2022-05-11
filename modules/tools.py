@@ -1,11 +1,36 @@
 import numpy as np
 import h5py
-import matplotlib.pyplot as plt
 import time
-from numba import njit, jit
 from modules import initialize
 from multiprocessing import Pool
 import os
+from scipy import signal
+
+def autocorr(x, y='auto'):
+    if y=='auto':
+        x1 = x
+    else:
+        x1 = y
+    result = signal.correlate(x, x1, mode='full', method='fft')
+    v = [result[i] / (len(x) - abs(i - (len(x)) + 1)) for i in range(len(result))]
+    return np.array(v[int(result.size / 2):])
+
+def corr_loop(x, y, tinblock):
+    niterinblock=tinblock//300
+    corr = np.zeros(tinblock, dtype=np.complex_)
+    for i in range(0, tinblock, int(tinblock / niterinblock)):
+        corr += autocorr(x[i:tinblock+i],y[i:tinblock+i]) / niterinblock
+    return corr
+def corr_parallel(x, y, nblocks, ncpus=1):
+    tblock = int(len(x) / nblocks)
+    tinblock = int(tblock / 2)
+    print('snap per block', tinblock)
+    with Pool(ncpus) as p:
+        inputs = [(x[(tblock * i):(tblock * (i+1))],
+                  y[(tblock * i):(tblock * (i+1))],
+                  tinblock) for i in range(nblocks)]
+        result = p.starmap(corr_loop, inputs)
+    return np.array(result)
 
 def stdblock(array):
     var = list()
@@ -23,6 +48,14 @@ def stdblock(array):
         nbino = nbin
 
     return np.array(var), np.array(binsize)
+
+def stdblock_parallel(x, ncpus=1):
+    start=time.time()
+    with Pool(ncpus) as p:
+        inputs = [(x[i],) for i in range(np.shape(x)[0])]
+        result = p.starmap(stdblock, inputs)
+    print('done in ', time.time()-start)
+    return np.array(result)
 
 def Ggeneratemod(nk):
     G = np.zeros((nk, 3))
@@ -83,7 +116,6 @@ def msd(dump, pos0, lenght):
         dist2[i] = np.linalg.norm(pos - pos0, axis=0)[list2].mean()
         dist[i] = np.linalg.norm(pos - pos0, axis=0).mean()
     return dist1, dist2, dist
-
 
 def gor(dump, lenght, L, ngridd):
     r = np.linspace(0.01, L[0] / 2, ngridd)

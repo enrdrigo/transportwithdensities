@@ -437,21 +437,22 @@ def write_xyz(outfile, data, natoms_per_type, type_names=None, type_array=None, 
         if poscar:
             if itimestep % (nsteps//nposcar):
                 with open('FOLDER_POSCAR/POSCAR.{}'.format(itimestep // (nsteps//nposcar)), 'w+') as g:
-                    for itype in range(natoms_per_type):
+                    for itype in range(len(natoms_per_type)):
                         g.write('{}'.format(type_names[itype])+'{} '.format(natoms_per_type[itype]))
                     g.write('\n')
                     g.write('1.0\n')
                     g.write('{} {}\n'.format(0, CELL[itimestep, 0]))
                     g.write('{} {}\n'.format(0, CELL[itimestep, 4]))
                     g.write('{} {}\n'.format(0, CELL[itimestep, 8]))
-                    for itype in range(natoms_per_type):
+
+                    for itype in range(len(natoms_per_type)):
                         g.write('{} '.format(type_names[itype]))
                     g.write('\n')
-                    for itype in range(natoms_per_type):
+                    for itype in range(len(natoms_per_type)):
                         g.write('{} '.format(natoms_per_type[itype]))
                     g.write('\n')
                     g.write('Cartesian\n')
-                    for itype in range(natoms_per_type):
+                    for itype in range(len(natoms_per_type)):
                         listat=np.where(type_array==itype)[0]
                         for idat in listat:
                             g.write(' {} {} {} \n'.format(POS[itimestep, idat, 0],

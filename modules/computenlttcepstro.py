@@ -14,10 +14,15 @@ from sportran import md
 import time
 
 
-def autocorr(x):
-    result = signal.correlate(x, x, mode='full', method='fft')
+def autocorr(x, y='auto'):
+    if y=='auto':
+        x1 = x
+    else:
+        x1 = y
+    result = signal.correlate(x, x1, mode='full', method='fft')
     v = [result[i] / (len(x) - abs(i - (len(x)) + 1)) for i in range(len(result))]
     return np.array(v[int(result.size / 2):])
+
 
 def Ggeneratemod(nk):
     G = np.zeros((nk, 3))
