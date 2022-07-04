@@ -12,7 +12,7 @@ def autocorr(x, y='auto'):
     else:
         x1 = y
     result = signal.correlate(x, x1, mode='full', method='fft')
-    v = [result[i] / (len(x) - abs(i - (len(x)) + 1)) for i in range(len(result))]
+    v = [result[i] / (len(x) - abs(i - len(x) + 1))  for i in range(len(result))]
     return np.array(v[int(result.size / 2):])
 
 def corr_loop(x, y, tinblock):

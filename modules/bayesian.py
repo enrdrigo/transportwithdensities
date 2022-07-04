@@ -39,9 +39,9 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     # x_infer sono i punti k dove voglio inferire il risultato.
     sigma_noise = sdata[1][:N]
     if ifwarning:
-        logging.warning(str('HO IMPOSTATO A MANO CHE 2\PI/L = 0.13484487571168569'))
-    x = grid[:N, :].T * 0.13484487571168569
-    x_infer = grid[:N, :].T * 0.13484487571168569
+        logging.warning(str('HO IMPOSTATO A MANO CHE 2\PI/L = 0.20230317263794637'))
+    x = grid[:N, :].T * 0.20230317263794637
+    #x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     betha = bethapar * (1 / sigma_noise) ** 2
 
@@ -54,7 +54,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     if ifprint: print('parametri ottimali', mN)
     if ifprint: print('numero di armoniche cubiche', contanumpol)
 
-    Phi_infer, contanumpolinfer = computephicubichandL(x_infer, np.ones(N), M, nL=nLbp)
+    Phi_infer, contanumpolinfer = computephicubichandL(x_infer, np.ones(np.shape(x_infer)[1]), M, nL=nLbp)
 
     y_infer = np.dot(mN, Phi_infer)
 
@@ -78,8 +78,8 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
     alpha_vP = []
     betha_vP = []
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T * 0.13484487571168569
-    x_infer = grid[:N, :].T * 0.13484487571168569
+    x = grid[:N, :].T * 0.20230317263794637
+    #x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     Mv_list = []
     sigma_noise = sdata[1][:N]
@@ -157,7 +157,7 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
     if ifprintfinal: print('best alpha', alpha_vP[index])
     if ifprintfinal: print('best betha', betha_vP[index])
 
-    return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP, Mv_list
+    return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP, Mv_list[index]
 
 
 def bayesianmodelprediction(grid, sdata, N, x_infer, ifprintmodpred=False, ifprintfinal=False, nLbmp=0):
@@ -172,8 +172,8 @@ def bayesianmodelprediction(grid, sdata, N, x_infer, ifprintmodpred=False, ifpri
     alpha_vP = []
     betha_vP = np.zeros((M_tot))
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T * 0.13484487571168569
-    x_infer = grid[:N, :].T * 0.13484487571168569
+    x = grid[:N, :].T * 0.20230317263794637
+    x_infer = grid[:N, :].T * 0.20230317263794637
     y_noise = sdata[0][:N]
     Mv_list = []
     sigma_noise = sdata[1][:N]
