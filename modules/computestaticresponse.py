@@ -15,11 +15,8 @@ def computestaticresponse(root, L, nk, temp, plot=False):
     else:
         raise ValueError('Compute the chk.pkl file con la routine traj.py!!')
 
-    fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 / (L[0] * L[1] * L[2] * 1.0e-30 * 1.38e-23 * temp ** 2 * 8.854 * 1.0e-12))
     face = (16.022 ** 2) * 1.0e5 / (L[0] * L[1] * L[2] * 1.38 * temp * 8.854)
     xk = tools.Ggeneratemodall(nk, L) * 2 * np.pi
-
-    # xk = np.linspace(0, nk - 1, nk) * 2 * np.pi / L + np.sqrt(3.) * 1.0e-5 * 2 * np.pi / L
 
     d = np.zeros(nk, np.complex_)
 
@@ -29,19 +26,12 @@ def computestaticresponse(root, L, nk, temp, plot=False):
     for i in range(nk):
         d[i] = np.mean((chk[i] / xk[i]) * np.conj(chk[i] / xk[i])) * face
 
-    convergence1 = np.real((np.cumsum((chk[0][:] / xk[0]) * np.conj(chk[0][:] / xk[0])) * fac) / (
-            np.cumsum((chk[0][:] / xk[0]) * np.conj(chk[0][:] / xk[0])) * face))
-    convergence2 = np.real((np.cumsum((chk[1][:] / xk[1]) * np.conj(chk[1][:] / xk[1])) * fac) / (
-            np.cumsum((chk[1][:] / xk[1]) * np.conj(chk[1][:] / xk[1])) * face))
-    convergence3 = np.real((np.cumsum((chk[2][:] / xk[2]) * np.conj(chk[2][:] / xk[2])) * fac) / (
-            np.cumsum((chk[2][:] / xk[2]) * np.conj(chk[2][:] / xk[2])) * face))
-    convergence4 = np.real((np.cumsum((chk[3][:] / xk[3]) * np.conj(chk[3][:] / xk[3])) * fac) / (
-            np.cumsum((chk[3][:] / xk[3]) * np.conj(chk[3][:] / xk[3])) * face))
+    convergence1 = np.real(((chk[0][:] / xk[0]) * np.conj(chk[0][:] / xk[0])) * face)
+    convergence2 = np.real(((chk[1][:] / xk[1]) * np.conj(chk[1][:] / xk[1])) * face)
 
-    with open(root + 'convergence.out', '+w') as g:
-        for i in range(1, len(chk[0]), 10):
-            g.write('{}\t'.format(i) + '{}\t'.format(convergence1[i]) + '{}\t'.format(convergence2[i]) + '{}\t'.format(
-                convergence3[i]) + '{}\n'.format(convergence4[i]))
+    with open(root + 'convergence_dielectric.out', '+w') as g:
+        for i in range(1, len(chk[0])):
+            g.write('{}\t'.format(i) + '{}\t'.format(convergence1[i]) + '{}\n'.format(convergence2[i]))
 
     for i in range(nk):
         std, bins = np.sqrt(tools.stdblock((chk[i] / xk[i]) * np.conj(chk[i] / xk[i]) * face))
