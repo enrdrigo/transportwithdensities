@@ -3,6 +3,7 @@ from scipy import signal
 import pickle as pk
 import os
 from modules import computestaticresponse
+from modules import tools
 
 try:
     import sportran as st
@@ -14,69 +15,24 @@ from sportran import md
 import time
 
 
-def autocorr(x, y='auto'):
-    if y=='auto':
-        x1 = x
-    else:
-        x1 = y
-    result = signal.correlate(x, x1, mode='full', method='fft')
-    v = [result[i] / (len(x) - abs(i - (len(x)) + 1)) for i in range(len(result))]
-    return np.array(v[int(result.size / 2):])
 
 
-def Ggeneratemod(nk):
-    G = np.zeros((nk, 3))
-    conta = 0
-    i1 = 1
-    i2 = 0
-    i3 = 0
-    G[0] = np.array([0, 0, 0])
-    for i in range(1, nk):
-        G[i] = np.array([i1, i2, i3])
-        if G[i][0] != G[i][1] and G[i][1] == G[i][2]:
-            i2 += 1
-            if G[i][0] != G[i][1] and G[i][1] != G[i][2]:
-                i3 += 1
+
+
+def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp=None, enkadata=None):
+    if enkainp==None:
+        if os.path.exists(root + 'enk.npy'):
+            enka = np.load(root + 'enk.npy')
+            print('data loaded')
         else:
-            if G[i][1] != G[i][2]:
-                i3 += 1
-        if G[i][0] == G[i][1] and G[i][0] == G[i][2]:
-            i1 += 1
-            i2 = 0
-            i3 = 0
-    Gmod = np.linalg.norm(G, axis=1)
-    return Gmod
-
-
-def Ggeneratemodall(nk, L):
-    G = np.zeros((nk, 3))
-    conta = 0
-    G[0] = np.array([0, 0, 0]) + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
-    nkp = int(np.power(nk, 1 / 3)) + 1
-    for i in range(0, nkp):
-        for j in range(0, nkp):
-            for k in range(0, nkp):
-                if i==0 and j==0 and k==0 : continue
-                conta += 1
-                if conta == nk:
-                    Gmod = np.linalg.norm(G, axis=1)
-                    return Gmod
-                G[conta] = np.array([i, j, k]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
-
-    Gmod = np.linalg.norm(G, axis=1)
-    return Gmod
-
-def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1):
-    if os.path.exists(root + 'enk.npy'):
-        enka = np.load(root + 'enk.npy')
-        print('data loaded')
+            with open(root + 'enk.pkl', 'rb') as f:
+                enk = pk.load(f)
+            print(root + 'enk.pkl' + 'loaded correctly')
+            np.save(root + 'enk.npy', np.array(enk))
+            enk=0 #mi serve per deallocare la memoria dalla ram, trova un modo piu' bello magari...
+            enka=np.load(root + 'enk.npy')
     else:
-        with open(root + 'enk.pkl', 'rb') as f:
-            enk = pk.load(f)
-        print(root + 'enk.pkl' + 'loaded correctly')
-        np.save(root + 'enk.npy', np.array(enk))
-        enk=0 #mi serve per deallocare la memoria dalla ram, trova un modo piu' bello magari...
-        enka=np.load(root + 'enk.npy')
+        enka = enkadata
 
     kpoints = []
     wcepstrum = []
@@ -113,7 +69,7 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
     fac = rho * cp  # J/k/m^3
 
     dt = deltat * tdump  # ps
-    Gmod = Ggeneratemodall(nk, L)
+    Gmod = tools.Ggeneratemodall(nk, L)
 
     if not kv:
         if verbose=='high':print('find k from number')
@@ -171,7 +127,7 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
     chi = 0.5 * np.real(enka[:, k]) ** 2 + 0.5 * np.imag(enka[:, k]) ** 2 - np.mean(
         0.5 * np.real(enka[:, k]) + 0.5 * np.imag(enka[:, k])) ** 2
 
-    v, b = computestaticresponse.stdblock(chi)
+    v, b = tools.stdblock(chi)
 
     errrelchi=np.sqrt(v[int(19/20*len(v))])/(np.mean(chi))
 

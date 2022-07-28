@@ -40,7 +40,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     sigma_noise = sdata[1][:N]
     if ifwarning:
         logging.warning(str('HO IMPOSTATO A MANO CHE 2\PI/L = 0.20230317263794637'))
-    x = grid[:N, :].T * 0.20230317263794637
+    x = grid[:N, :].T
     #x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     betha = bethapar * (1 / sigma_noise) ** 2
@@ -78,7 +78,7 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
     alpha_vP = []
     betha_vP = []
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T * 0.20230317263794637
+    x = grid[:N, :].T
     #x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     Mv_list = []
@@ -172,8 +172,8 @@ def bayesianmodelprediction(grid, sdata, N, x_infer, ifprintmodpred=False, ifpri
     alpha_vP = []
     betha_vP = np.zeros((M_tot))
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T * 0.20230317263794637
-    x_infer = grid[:N, :].T * 0.20230317263794637
+    x = grid[:N, :].T
+    x_infer = grid[:N, :].T 
     y_noise = sdata[0][:N]
     Mv_list = []
     sigma_noise = sdata[1][:N]

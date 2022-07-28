@@ -62,13 +62,19 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
     if UNITS == 'real':
         fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 /
                (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))
+    if UNITS == 'lj':
+        fac = (1/(inp['size'].prod() * log['Temp'].mean() ** 2))
 
     face = (16.022 * 1.0e-20 * 1.0e-10) * (16.022 * 1.0e-20 * 1.0e-10)/ (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() * 8.854 * 1.0e-12)
     print('static dielectric constant')
     print((np.mean((chk) * np.conj(chk), axis=0) / G ** 2)[0] * face)
+    print('polarizability at k_min')
+    print((np.mean((chk) * np.conj(chk), axis=0) / G ** 2)[1] * face)
+    print('enthalpy contribution')
+    print(-(np.mean((n1k * h[0] + n2k * h[1]) * np.conj(chk), axis=0) / G ** 2)[1] * fac)
 
-    np.save(root+'convergenceenergy_charge.npy', (((enk) * np.conj(chk))/ G ** 2)[:, 1:] * fac)
-    np.save(root + 'convergenceseebeck.npy', (((enk) * np.conj(chk) - n1k * h[0] + n2k * h[1]) / G ** 2)[:, 1:] * fac)
+    np.savetxt(root+'convergenceenergy_charge.out', np.cumsum((((enk) * np.conj(chk))/ G ** 2)[:, 1]) * fac)
+    np.savetxt(root + 'convergenceseebeck.out', np.cumsum((((enk - n1k * h[0] - n2k * h[1]) * np.conj(chk)) / G ** 2)[:, 1]) * fac)
     a = (np.mean((enk) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     b = -(np.mean((n1k * h[0] + n2k * h[1]) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     for i in range(1, chk.shape[1]):
@@ -79,6 +85,13 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
             fac * (n1k[:, i] * h[0] + h[1] * n2k[:, i]) * np.conj(chk[:, i]) / G[i] ** 2)
         pp = int(16 * len(std) / 20)
         vb[i - 1] = std[pp]
+    with open(inp['root'] + 'stdk_min.out', 'w') as f:
+
+        stda, bins = computestaticresponse.stdblock(fac * (enk[:, 1]) * np.conj(chk[:, 1]) / G[1] ** 2)
+        stdb, bins = computestaticresponse.stdblock(
+            fac * (n1k[:, 1] * h[0] + h[1] * n2k[:, 1]) * np.conj(chk[:, 1]) / G[1] ** 2)
+        for i in range(len(bins)):
+            f.write('{}\t'.format(bins[i]) + '{}\n'.format((stda + stdb)[i]))
 
     if plot:
         f, ax = plt.subplots(1)

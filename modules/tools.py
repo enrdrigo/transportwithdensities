@@ -6,12 +6,8 @@ from multiprocessing import Pool
 import os
 from scipy import signal
 
-def autocorr(x, y='auto'):
-    if y=='auto':
-        x1 = x
-    else:
-        x1 = y
-    result = signal.correlate(x, x1, mode='full', method='fft')
+def autocorr(x, y):
+    result = signal.correlate(x, y, mode='full', method='fft')
     v = [result[i] / (len(x) - abs(i - len(x) + 1))  for i in range(len(result))]
     return np.array(v[int(result.size / 2):])
 
@@ -80,6 +76,26 @@ def Ggeneratemod(nk):
     Gmod = np.linalg.norm(G, axis=1)
     return Gmod
 
+def Ggenerateall(nk, Np, L, natpermol):
+    G = np.zeros((nk, 3))
+    conta = 0
+    G[0] = np.array([0, 0, 0]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
+    nkp = int(np.power(nk, 1/3))+1
+    for i in range(0, nkp):
+        for j in range(0, nkp):
+            for k in range(0, nkp):
+                if i == 0 and j == 0 and k == 0: continue
+                conta += 1
+                if conta == nk:
+                    Gmod = np.linalg.norm(G, axis=1)
+                    return G[:, np.newaxis, :] * np.ones((nk, Np, 3)),\
+                           G[:, np.newaxis, :] * np.ones((nk, int(Np / natpermol), 3)),\
+                           Gmod[:, np.newaxis] * np.ones((nk, Np)), Gmod[:, np.newaxis] * np.ones((nk, int(Np / natpermol)))
+                G[conta] = np.array([i, j, k]) / L + 2.335581758729501e-06 / 2 / np.pi / np.sqrt(3.0)
+
+    Gmod = np.linalg.norm(G, axis=1)
+    return G[:, np.newaxis, :] * np.ones((nk, Np, 3)), G[:, np.newaxis, :] * np.ones((nk, int(Np / natpermol), 3)),\
+           Gmod[:, np.newaxis] * np.ones((nk, Np)), Gmod[:, np.newaxis] * np.ones((nk, int(Np / natpermol)))
 
 def Ggeneratemodall(nk, L):
     G = np.zeros((nk, 3))
