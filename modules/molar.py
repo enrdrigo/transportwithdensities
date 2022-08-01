@@ -72,8 +72,10 @@ def molar(root, filename, Np, nblocks):
 
         fetta = {'x': 0, 'y': 1, 'z': 2}
         portions = ['x', 'y', 'z']
+        startr = time.time()
         snap = list(dump.keys())
-        print('letta la lista delle chiavi del file h5py')
+        print('letta la lista delle chiavi del file h5py in {}'.format(time.time()-startr))
+        startr = time.time()
         energies = np.zeros((len(snap), len(portions)))
         enmean = np.zeros(len(snap))
         N1 = np.zeros((len(snap), len(portions)))
@@ -85,7 +87,9 @@ def molar(root, filename, Np, nblocks):
 
         for i in range(1, len(snap) + 1):
 
-            if i % int(len(snap) / 10) == 0: print((i * 100) // len(snap), '% done')
+            if i % int(len(snap) / 10) == 0:
+                print((i * 100) // len(snap), '% done in {}'.format(time.time()-startr))
+                startr=time.time()
 
             j = i - 1
             dumpdata = dump[str(i)][()].T
@@ -113,7 +117,7 @@ def molar(root, filename, Np, nblocks):
     xb = np.zeros((nblocks, len(portions), 2))
 
     for b in range(nblocks):
-        print('block number ', b)
+
         energiesb = np.zeros((int(len(snap) / nblocks), 3))
         N1b = np.zeros((int(len(snap) / nblocks), 3))
         N2b = np.zeros((int(len(snap) / nblocks), 3))

@@ -2,7 +2,6 @@ import numpy as np
 from scipy import signal
 import pickle as pk
 import os
-from modules import computestaticresponse
 from modules import tools
 
 try:
