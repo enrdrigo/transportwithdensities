@@ -3,6 +3,40 @@ import pickle as pk
 import matplotlib.pyplot as plt
 import os
 from modules import tools
+from modules import molar
+
+def compute_ncp(root, filename_log, nk):
+    if os.path.exists(root + 'chk.pkl'):
+        with open(root + 'chk.pkl', 'rb') as g:
+            chkb = pk.load(g)
+            chk = np.transpose(np.array(chkb))
+        nsnap = int(len(chkb))
+    else:
+        raise ValueError('Compute the chk.pkl file con la routine traj.py!!')
+
+    if os.path.exists(root + 'enk.pkl'):
+        with open(root + 'enk.pkl', 'rb') as g:
+            enkb = pk.load(g)
+            enk = np.transpose(np.array(enkb))
+    else:
+        raise ValueError('Compute the enk.pkl file con la routine traj.py!!')
+
+    if os.path.exists(root + filename_log + '.npy'):
+        pass
+    else:
+        raise ValueError('crea il file log.lammps.npy!! con la routine read_log_lammps')
+    dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
+
+    print(dic_data_log.keys())
+
+    ncp=np.zeros(nk)
+
+    h=dic_data_log['Entalpy'].mean()
+
+    temp=dic_data_log['Temp'].mean()
+
+    ncp = np.mean(np.abs(enk -h*chk), axis=1)/temp
+
 
 
 def computestaticresponse(root, L, nk, temp, plot=False):

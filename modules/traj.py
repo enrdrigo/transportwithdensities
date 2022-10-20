@@ -6,6 +6,7 @@ from numba import njit
 import time
 import h5py
 import os
+import logging
 import warnings
 
 
@@ -34,7 +35,7 @@ def read_dump(root, filename, Np, ntry):
 
         if os.path.exists(root + 'dump.h5'):
             with h5py.File(root + 'dump.h5', 'r') as dump:
-                snap = list(dump.keys())
+                snap = [[] for i in range(dump['data'].len())]
 
             lenght = len(snap)
             print('THE LOADING WAS STOPPED AT THE SNAPSHOT: ', lenght)
@@ -47,9 +48,17 @@ def read_dump(root, filename, Np, ntry):
         d = []
         start = time.time()
 
-        print(f.name)
+        logging.info(str(f.name))
+        logging.info(str(dump.keys()))
+        start0 = time.time()
 
         for index, line in enumerate(f):
+            if int((index+1) % 1.0e7) == 0:
+                dump.close()
+                dump = h5py.File(root + 'dump.h5', 'a')
+                logging.info(str(dump['data'].len()))
+                logging.info(str(time.time()-start0))
+                start0=time.time()
 
             if index < lenght * (Np + 9):
                 continue
@@ -60,7 +69,7 @@ def read_dump(root, filename, Np, ntry):
 
                 if i != '': linesplit.append(i)
 
-            if len(linesplit) != len(dickeys) and len(linesplit) != len(dickeys) + 1:
+            if len(linesplit) != len(dickeys):
                 continue
             dlist = [float(linesplit[i]) for i in range(len(dickeys))]
             d.append(dlist)
@@ -83,8 +92,12 @@ def read_dump(root, filename, Np, ntry):
 
                 datisnap = np.array(d)
                 d = []
-                dump.create_dataset(str((index + 1) // (Np + 9)),
-                                    data=datisnap)  # compression for float do not work well
+                if index == Np + 9 -1:
+                    dump.create_dataset('data', data=datisnap[np.newaxis, :, :], compression="gzip", chunks=True,
+                            maxshape=(None,datisnap.shape[0], datisnap.shape[1]))  # compression for float do not work well
+                else:
+                    dump['data'].resize((dump['data'].shape[0] + 1), axis=0)
+                    dump['data'][-1] = datisnap
 
                 if (index + 1) // (Np + 9) + 3 == ntry * 3:
                     print('number of total snapshots is', (index + 1) // (Np + 9) / 3)
@@ -122,7 +135,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
         g.write('start the computation of the fourier transform of the densities\n')
     with h5py.File(root + 'dump.h5', 'r') as dump:
         print('tempo di apertira', time.time() - start0)
-        snap = list(dump.keys())
+        snap = [[] for i in range(dump['data'].len())]
 
         if os.path.exists(root + 'chk.pkl'):
             with open(root + 'enk.pkl', 'rb') as g:
@@ -144,14 +157,14 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
         else:
             lenght = 0
 
-        for i in range(lenght + 1, len(snap) + 1):
+        for i in range(lenght + 1, len(snap)):
 
             start1 = time.time()
 
             if ifprint:
                 print(len(chk))
 
-            datisnap = dump[str(i)][()]
+            datisnap = dump['data'][i,:,:]
 
             list1 = np.where(datisnap.T[1] == 1)
 
