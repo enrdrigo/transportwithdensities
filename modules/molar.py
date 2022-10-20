@@ -73,7 +73,7 @@ def molar(root, filename, Np, nblocks):
         fetta = {'x': 0, 'y': 1, 'z': 2}
         portions = ['x', 'y', 'z']
         startr = time.time()
-        snap = list(dump.keys())
+        snap = [[] for i in range(dump['data'].len())]  
         print('letta la lista delle chiavi del file h5py in {}'.format(time.time()-startr))
         startr = time.time()
         energies = np.zeros((len(snap), len(portions)))
@@ -92,7 +92,7 @@ def molar(root, filename, Np, nblocks):
                 startr=time.time()
 
             j = i - 1
-            dumpdata = dump[str(i)][()].T
+            dumpdata = dump['data'][j].T
             enmean[j] = dumpdata[6].sum() + dumpdata[7].sum()
             pos = wrappos(dumpdata[2:5], L, L_min)
             posunw = dumpdata[2:5]

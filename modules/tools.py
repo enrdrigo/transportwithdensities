@@ -120,11 +120,11 @@ def msd(dump, pos0, lenght):
     dist1 = np.zeros(lenght)
     dist2 = np.zeros(lenght)
     dist = np.zeros(lenght)
-    snap = list(dump.keys())
+    snap = [[] for i in range(dump['data'].len())]
     nsnap = len(snap)
     for i in range(lenght):
         j = i * int(len(snap) / lenght) + 2
-        dumpdata = dump[str(j)][()].T
+        dumpdata = dump['data'][j].T
         list1 = np.where(dumpdata[1] == 1.)
         list2 = np.where(dumpdata[1] == 2.)
         pos = dumpdata[2:5]
@@ -142,10 +142,10 @@ def gor(dump, lenght, L, ngridd):
     gor1t = np.zeros((ngrid, lenght))
     gor2t = np.zeros((ngrid, lenght))
     gor12t = np.zeros((ngrid, lenght))
-    snap = list(dump.keys())
+    snap = [[] for i in range(dump['data'].len())]
     for i in range(lenght):
         j = i * int(len(snap) / lenght) + 1
-        dumpdata = dump[str(j)][()].T
+        dumpdata = dump['data'][j].T
         list1 = np.where(dumpdata[1] == 1.)
         list2 = np.where(dumpdata[1] == 2.)
         pos = dumpdata[2:5]
@@ -199,7 +199,7 @@ def msd_parallel(root='./', nblockstraj=10, timeskip=10, ncpus=os.cpu_count()):
     print('ncpus machine', os.cpu_count())
     with h5py.File(root + 'dump.h5', 'r') as dump:
         listasnap = []
-        nsnap = list(dump.keys())
+        nsnap = [[] for i in range(dump['data'].len())]
         nsnapperblock = int(len(nsnap) / nblockstraj)
         lenght = int(len(nsnap) / timeskip)
         lenghtperblock = int(lenght / nblockstraj)
@@ -212,12 +212,12 @@ def msd_parallel(root='./', nblockstraj=10, timeskip=10, ncpus=os.cpu_count()):
             startread = time.time()
             for i in range(1, nsnapperblock - 1, skipperblock):
                 j = nread * nsnapperblock + i + 1
-                listasnap.append(dump[str(j)][()])
+                listasnap.append(dump['data'][j])
             lenght = int(len(nsnap) / nblockstraj)
             print('read in ', time.time() - startread)
             startloop = time.time()
             with Pool(ncpus) as p:
-                dumpdata = dump[str(1)][()].T
+                dumpdata = dump['data'][1].T
                 pos0 = dumpdata[2:5]
                 inputs = [(listasnap, pos0, lenghtperblock, i) for i in range(lenghtperblock)]
                 result = p.starmap(msdloop, inputs)
@@ -284,7 +284,7 @@ def gor_parallel(root='./', filename='dump.lammpstrj', nblockstraj=10, timeskip=
     ngrid = ngridd - 1
     with h5py.File(root + 'dump.h5', 'r') as dump:
         listasnap = []
-        nsnap = list(dump.keys())
+        nsnap = [[] for i in range(dump['data'].len())]
         nsnapperblock = int(len(nsnap) / nblockstraj)
         lenght = int(len(nsnap) / timeskip)
         lenghtperblock = int(lenght / nblockstraj)
@@ -297,7 +297,7 @@ def gor_parallel(root='./', filename='dump.lammpstrj', nblockstraj=10, timeskip=
             startread = time.time()
             for i in range(1, nsnapperblock - 1, skipperblock):
                 j = nread * nsnapperblock + i + 1
-                listasnap.append(dump[str(j)][()])
+                listasnap.append(dump['data'][j])
             lenght = int(len(nsnap) / nblockstraj)
             print('read in ', time.time() - startread)
             startloop = time.time()
