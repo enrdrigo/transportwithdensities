@@ -46,9 +46,9 @@ def computecorrheat(root, filename, filename_loglammps, nk, redor=False, nblock=
                                 np.mean(flux.T - hm[0] * vcm_1.T - hm[1] * vcm_2.T, axis=0),
                                 nblock, ncpus=ncpus))
     res = {}
-    res = {cec: 'heat charge currents time correlation',
-           ccc: 'charge charge currents time correlation',
-           cee: 'heat heat currents time correlation'}
+    res = {'heat charge currents time correlation': cec,
+           'charge charge currents time correlation' : ccc,
+           'heat heat currents time correlation' : cee}
     np.save(root+str(nblock)+'corr.npy', res)
     return
 
@@ -122,12 +122,12 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
                                 hestdcc[i][:, 0, 0] * hetrec[i].mean(axis=0) ** 2 / hetrcc[i].mean(axis=0) ** 4)
 
         res={}
-        res={t: 'time',
-            hetrcc: 'cc_onsager',
-            hestdcc: 'cc_std',
-            hetrec: 'ec_onsager',
-            hestdec: 'ec_std',
-            hetpgkc: 'ec_cc_ratio_onsager',
-            hestdtpgkc: 'ec_cc_ratio_std'}
+        res={'time': t,
+            'cc_onsager': hetrcc,
+            'cc_std': hestdcc ,
+            'ec_onsager': hetrec,
+            'ec_std': hestdec,
+            'ec_cc_ratio_onsager': hetpgkc,
+            'ec_cc_ratio_std': hestdtpgkc}
 
         return res

@@ -92,7 +92,7 @@ def molar(root, filename, Np, nblocks):
 
             if i % int(len(snap) / 10) == 0:
                 with open(root + 'molaroutput.out', 'a') as g:
-                    g.write(str((i * 100) // len(snap)) + '% done in {}'.format(time.time()-startr))
+                    g.write(str((i * 100) // len(snap)) + '% done in {}\n'.format(time.time()-startr))
                 print((i * 100) // len(snap), '% done in {}'.format(time.time()-startr))
                 startr=time.time()
 
@@ -200,17 +200,17 @@ def molar(root, filename, Np, nblocks):
         #ub ha le dimensioni #blocchi, #fetta, #specie
         ub[b] = u
     with open(root + 'molaroutput.out', 'a') as g:
-        g.write('partial volumes' +
+        g.write('partial volumes\n' +
           str(vb.mean(axis=1).mean(axis=0)) +
-          ', \n euler relation for the partial volumes:' +
+          ', \n euler relation for the partial volumes:\n' +
           str(np.sum(vb.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
-        g.write('partial energies' +
+        g.write('partial energies\n' +
           str(ub.mean(axis=1).mean(axis=0)) +
-          ', \n euler relations for the partial energies:' +
+          ', \n euler relations for the partial energies:\n' +
           str(enmean.mean() / Np) +
           str(np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
-        g.write('mean energies per species:' + str(enm1.mean()) + str(enm2.mean()))
-        g.write('elapsed time: ' + str(time.time() - start))
+        g.write('mean energies per species:\n' + str(enm1.mean()) + str(enm2.mean()))
+        g.write('elapsed time: \n' + str(time.time() - start))
         g.write('End molar routine')
     print('partial volumes',
           vb.mean(axis=1).mean(axis=0),
