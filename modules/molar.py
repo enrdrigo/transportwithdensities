@@ -235,11 +235,18 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     print('Start molar_enthalpy routine')
     start=time.time()
     volumepp = volume / Np
+
+    if os.path.exists(root + 'molar.npy'):
+        res = np.load(root + 'molar.npy')
+        return res['molar enthalpies']
+    else: pass
     if os.path.exists(root + filename_log + '.npy'):
         dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
     else:
         dic_data_log = read_log_lammps(root=root,
                                     filename=filename_log)
+
+
 
     print(dic_data_log.keys())
 
@@ -288,5 +295,12 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     print('std partial enthalpies', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
     print('Elapsed time', time.time() - start)
     print('End molar_enthalpy routine')
+
+    res = {}
+    res = {'molar enthalpies': h,
+           'molar volumes': v*volumepp,
+           'molar energies': u}
+
+    np.save(root + 'molar.npy', res)
 
     return h

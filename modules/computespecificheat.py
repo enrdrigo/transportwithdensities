@@ -3,11 +3,15 @@ import pickle as pkl
 from modules import molar
 from modules import tools
 from modules import initialize
+import os
 
 
 def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS):
     inp = initialize.getinitialize(filename, root, posox, nk, -1)
-    s = molar.read_log_lammps(root, filename_loglammps)
+    if os.path.exists(root + filename_loglammps + '.npy'):
+        s = np.load(root + filename_loglammps + '.npy', allow_pickle='TRUE').item()
+    else:
+        s = molar.read_log_lammps(root=root, filename=filename_loglammps)
     with open(root + 'n1k.pkl', 'rb') as f:
         n1k = np.array(pkl.load(f)).T[:, :]
     with open(root + 'n2k.pkl', 'rb') as f:
@@ -44,12 +48,12 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS):
     stdce = np.sqrt(std[:, 0, int(std.shape[2] / 2)])
 
     res = {}
-    res = {cpk: 'cp',
-          stdcp: 'std cp',
-          cvk: 'cv',
-          stdcv: 'std cv',
-          cp_peth: 'cp with partial enthalpies',
-          stdcp_peth: 'std cp with partial enthalpies'}
+    res = {'cp': cpk,
+          'std cp': stdcp,
+          'cv': cvk,
+          'std cv': stdcv,
+          'cp with partial enthalpies': cp_peth,
+          'std cp with partial enthalpies': stdcp_peth}
 
     np.save(root+'specieficheat.npy', res)
 
