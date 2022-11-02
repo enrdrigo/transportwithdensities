@@ -94,7 +94,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
 
     gplot_0 = np.copy(grid)
     gplot_0[0] = np.zeros(3) + 0.0001
-    gplot_0 = k_min/3*(np.ones((100, 3)).T * np.linspace(0.01, np.linalg.norm(grid[N - 1]), 100) / np.sqrt(3)).T
+    gplot_0 = k_min*(np.ones((100, 3)).T * np.linspace(0.01, np.linalg.norm(grid[N]), 100) / np.sqrt(3)).T
 
     x_infer = gplot_0.T
 
