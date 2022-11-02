@@ -32,22 +32,19 @@ def computecorrheat(root, filename, filename_loglammps, nk, redor=False, nblock=
         vcm_1 = np.load(root + 'vcm[1].npy') * inp['N']/2
         vcm_2 = np.load(root + 'vcm[2].npy') * inp['N']/2
     TEMPERATURE = temp.mean()
-    h = molar.molar_enthalpy(root, filename, filename_loglammps, inp['size'].prod(), inp['N'], 12, UNITS=UNITS)
+    h = molar.molar_enthalpy(root, filename, filename_loglammps, inp['size'].prod(), inp['N'], nblocks=12, UNITS=UNITS)
     hm = h.mean(axis=1).mean(axis=0)
 
     ncpus = 40
     cec = np.real(tools.corr_parallel(np.mean(flux.T - hm[0] * vcm_1.T - hm[1] * vcm_2.T, axis=0),
                                 np.mean(vcm_1.T - vcm_2.T, axis=0),
                                 nblock, ncpus=ncpus))
-    np.save(root + '{}'.format(nblock) + 'cec.npy', cec)
     ccc = np.real(tools.corr_parallel(np.mean(vcm_1.T - vcm_2.T, axis=0),
                                 np.mean(vcm_1.T - vcm_2.T, axis=0),
                                 nblock, ncpus=ncpus))
-    np.save(root + '{}'.format(nblock) + 'ccc.npy', ccc)
     cee = np.real(tools.corr_parallel(np.mean(flux.T - hm[0] * vcm_1.T - hm[1] * vcm_2.T, axis=0),
                                 np.mean(flux.T - hm[0] * vcm_1.T - hm[1] * vcm_2.T, axis=0),
                                 nblock, ncpus=ncpus))
-    np.save(root + '{}'.format(nblock) + 'cee.npy', cee)
     res = {}
     res = {cec: 'heat charge currents time correlation',
            ccc: 'charge charge currents time correlation',
@@ -55,7 +52,7 @@ def computecorrheat(root, filename, filename_loglammps, nk, redor=False, nblock=
     np.save(root+str(nblock)+'corr.npy', res)
     return
 
-def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40], UNITS='metal'):
+def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40], UNITS='metal', plot=False):
     ncpus = 40
 
     cec = [[] for i in nblocks]
@@ -79,10 +76,10 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         nblock = nblocks[i]
 
         try:
-            diccorr=np.load(root+str(i)+'corr.npy').item()
+            diccorr=np.load(root+str(nblock)+'corr.npy').item()
         except:
-            computecorrheat(root, filename, filename_loglammps, nk, nblock=i, redor=False)
-            diccorr = np.load(root + str(i) + 'corr.npy').item()
+            computecorrheat(root, filename, filename_loglammps, nk, nblock=nblock, redor=False)
+            diccorr = np.load(root + str(nblock) + 'corr.npy').item()
 
         cec[i] = diccorr['heat charge currents time correlation']
         ccc[i] = diccorr['charge charge currents time correlation']
@@ -124,4 +121,13 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         hestdtpgkc[i] = np.sqrt(hestdec[i][:, 0, 0] / hetrcc[i].mean(axis=0) ** 2 + \
                                 hestdcc[i][:, 0, 0] * hetrec[i].mean(axis=0) ** 2 / hetrcc[i].mean(axis=0) ** 4)
 
-        return
+        res={}
+        res={t: 'time',
+            hetrcc: 'cc_onsager',
+            hestdcc: 'cc_std',
+            hetrec: 'ec_onsager',
+            hestdec: 'ec_std',
+            hetpgkc: 'ec_cc_ratio_onsager',
+            hestdtpgkc: 'ec_cc_ratio_std'}
+
+        return res
