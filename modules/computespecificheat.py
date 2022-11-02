@@ -62,16 +62,16 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS):
     np.save(root+'specieficheat.npy', res)
 
     with open(inp['root'] + 'cp.out', 'w') as f:
-        for i in range(cpk.shape[1] - 1):
+        for i in range(cpk.shape[0] - 1):
             f.write(
                 '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(cpk)[i]) + '{}\n'.format(stdcp[i]))
     with open(inp['root'] + 'cv.out', 'w') as f:
-        for i in range(cvk.shape[1] - 1):
+        for i in range(cvk.shape[0] - 1):
             f.write(
                 '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(cvk)[i]) + '{}\n'.format(stdcv[i]))
 
     with open(inp['root'] + 'cpenth.out', 'w') as f:
-        for i in range(cp_peth.shape[1] - 1):
+        for i in range(cp_peth.shape[0] - 1):
             f.write(
                 '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(cp_peth)[i]) + '{}\n'.format(stdcp_peth[i]))
 
