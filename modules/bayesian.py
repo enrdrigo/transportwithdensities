@@ -84,7 +84,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     return mN, SN, y_infer, sy_infer, contanumpol
 
 
-def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifprintfinal=True, nLbf=0):
+def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifprintfinal=True, nLbf=0, plot=False):
     # grid e' la griglia di punti k.
     # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
     # N e' il numero di dati nel fit.
@@ -185,6 +185,19 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     if ifprintfinal: print('numero di polinomi nella base ottimale: ', contabest, 'numero di dati', N)
     if ifprintfinal: print('best alpha', alpha_vP[index])
     if ifprintfinal: print('best betha', betha_vP[index])
+
+    if plot:
+        f, ax = plt.subplots()
+        ax.fill_between(np.linalg.norm(gplot_0[:], axis=1) * k_min,
+                        (y_infer + np.sqrt(sy_infer - 1)), (y_infer - np.sqrt(sy_infer - 1)),
+                        alpha=0.3, color='red')
+        ax.plot(np.linalg.norm(gplot_0[:], axis=1) * k_min, y_infer ,
+                '-', alpha=0.5, color='red', label='bayesian regression fit ')
+        ax.errorbar(np.linalg.norm(grid, axis=1) * k_min,
+                    dataplot , datasigmaplot ,
+                    fmt='.', label='data from MD', color='red')
+        plt.tight_layout()
+        plt.legend()
 
     return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP, Mv_list[index]
 
