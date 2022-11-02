@@ -79,7 +79,7 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
             diccorr=np.load(root+str(nblock)+'corr.npy').item()
         except:
             computecorrheat(root, filename, filename_loglammps, nk, nblock=nblock, redor=False)
-            diccorr = np.load(root + str(nblock) + 'corr.npy').item()
+            diccorr = np.load(root + str(nblock) + 'corr.npy', allow_pickle=True).item()
 
         cec[i] = diccorr['heat charge currents time correlation']
         ccc[i] = diccorr['charge charge currents time correlation']
