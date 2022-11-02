@@ -130,4 +130,4 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
             'ec_cc_ratio_onsager': hetpgkc,
             'ec_cc_ratio_std': hestdtpgkc}
 
-        return res
+    return res
