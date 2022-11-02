@@ -35,7 +35,7 @@ def datainit(root, filename, nk):
 
     sdata, grid = generatesorteddata(data, nk)
 
-    C = cubicarray(list(grid), pr=False)
+    C = cubicarray(list(grid), pr=True)
 
     dic, dics = datadicG(data[1], data[2], cubicharmonics.Gvecgenerateall(100)[1:])
 
@@ -84,7 +84,110 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     return mN, SN, y_infer, sy_infer, contanumpol
 
 
-def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprintfinal=False, nLbf=0):
+def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifprintfinal=True, nLbf=0):
+    # grid e' la griglia di punti k.
+    # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
+    # N e' il numero di dati nel fit.
+    # x_infer sono i punti k dove voglio inferire il risultato.
+
+    data, oldgrid, grid, dataplot, datasigmaplot, sdata, k_min = datainit(root=root, filename=filename, nk=nk)
+
+    x_infer = np.copy(grid)
+    x_infer[0] = np.zeros(3) + 0.0001
+    x_infer = (np.ones((100, 3)).T * np.linspace(0.01, np.linalg.norm(grid[N - 1]), 100) / np.sqrt(3)).T
+
+    M_tot = 15
+    # M_tot e' il numero massimo del grado del polinomio che considero
+    log_evidence_vP = []
+    alpha_vP = []
+    betha_vP = []
+    g_vP = np.zeros((M_tot))
+    x = grid[:N, :].T
+    # x_infer = grid[:N, :].T * 0.13484487571168569
+    y_noise = sdata[0][:N]
+    Mv_list = []
+    sigma_noise = sdata[1][:N]
+    betha0 = (1 / sigma_noise) ** 2
+    for M_v in range(1, M_tot):  # number of parameters
+
+        # calcolo il set di funzioni di base (armoniche cubiche) associate a questo grado M_v
+        Phi_vP, contanumpol = computephicubichandL(x, betha0, M_v, nL=nLbf)
+
+        # calcolo gli autovalori di Phi_vP, servono per la stima di alpha ottimale. Sono gli autovalori di
+        li_vP0, ei_vP = eig(np.dot(Phi_vP, Phi_vP.T))
+        # salto quando il determinante della matrice delle armiche cubiche ridotte e' troppo piccolo
+        if abs(np.prod(li_vP0)) < 1.0e-100:
+            if ifprintbestfit: print('determinante della martice delle armoniche cubiche minore di 1.0e-5, salto')
+            continue
+
+        bethap0 = 1
+        alpha0 = 1
+        delta_alphaP = 1
+        delta_alphaP = 1
+        alphaP = alpha0
+        bethaP = bethap0
+        conta = 0
+
+        # inizio il ciclo self-consistente per ottenere il valore migliore di alpha
+        while abs(delta_alphaP / (alphaP + 0.1)) > 1e-10 and conta < 1.0e3:
+            conta += 1
+            li_vP = li_vP0 * bethaP
+            SN_vP = np.linalg.inv(alphaP * np.identity(contanumpol) + bethaP * np.dot(Phi_vP, Phi_vP.T))
+            mN_vP = bethaP * np.dot(np.dot(SN_vP, Phi_vP), y_noise * np.sqrt(betha0))
+            g_vP = np.sum(li_vP.real / (alphaP + li_vP.real))
+            alpha1P = g_vP / (np.dot(mN_vP.T, mN_vP))
+            betha1P = 1 / (1 / (N - g_vP) * np.sum((y_noise * np.sqrt(betha0) - np.dot(mN_vP, Phi_vP)) ** 2))
+            delta_alphaP = alpha1P - alphaP
+            delta_bethaP = betha1P - bethaP
+            alphaP = alpha1P
+            if ifbetha: bethaP = betha1P
+
+        if (abs(delta_alphaP / (alphaP + 0.1)) > 1e-10):
+            if ifprintbestfit: print('no convergence', N, x[-1], conta, delta_alphaP, alphaP, M_v)
+            continue
+
+        Mv_list.append(M_v)
+        alpha_vP.append(alphaP)
+        betha_vP.append(bethaP)
+
+        # mi preparo a calcolare la funzione di evidence per il valore ottimale di alpha
+        A_vP = alphaP * np.identity(contanumpol) + bethaP * np.dot(Phi_vP, Phi_vP.T)
+        E_mNs_vP = bethaP / 2 * (y_noise * np.sqrt(betha0) - np.dot(Phi_vP.T, mN_vP.T)) ** 2
+        E_mN_vP = E_mNs_vP.sum()
+        log_evidence_vP.append(M_v / 2 * np.log(np.abs(alphaP)) + N / 2 * np.sum(np.log(bethaP * betha0)) - \
+                               E_mN_vP - 1 / 2 * np.log(np.abs(np.linalg.det(A_vP))))
+        if ifprintbestfit: print('numero di polinomi cubici fino al grado massimo ', 2 * M_v, ':', contanumpol)
+        if ifprintbestfit: print('best alpha:', alphaP, 'deltalpha:', delta_alphaP)
+        if ifprintbestfit: print('best betha:', bethaP, 'deltbetha:', delta_bethaP)
+        if ifprintbestfit: print('logevidence:',
+                                 M_v / 2 * np.log(np.abs(alphaP)) + N / 2 * np.sum(np.log(bethaP * betha0)) - \
+                                 E_mN_vP - 1 / 2 * np.log(np.abs(np.linalg.det(A_vP))))
+        if ifprintbestfit: print('contributi alla evidence:')
+        if ifprintbestfit: print('dalla normalizzazione ', M_v / 2 * np.log(np.abs(alphaP)), \
+                                 N / 2 * np.sum(np.log(bethaP * betha0)))
+        if ifprintbestfit: print('dalla likelihood:', -E_mN_vP)
+        if ifprintbestfit: print('dalla derivata seconda della likelihood (log(det(A))):',
+                                 - 1 / 2 * np.log(np.abs(np.linalg.det(A_vP))))
+        if ifprintbestfit: print('determinante della matrice delle armoniche cubiche ridotte',
+                                 np.linalg.det(np.dot(Phi_vP, Phi_vP.T)), '\n')
+
+    # valuto il grado ottimale del polinomio cercando il massimo della funzione di evidence
+    index = log_evidence_vP.index(max(log_evidence_vP))
+
+    # calcolo il fit bayesiano per il valore ottimale di alpha e per il grado che massimizza la evidence.
+    mN, SN, y_infer, sy_infer, contabest = bayesianpol(grid, sdata, Mv_list[index], N, alpha_vP[index], \
+                                                       x_infer, bethapar=betha_vP[index], ifprint=ifprintfinal, \
+                                                       ifwarning=False, nLbp=nLbf)
+
+    if ifprintfinal: print('grado ottimale', 2 * (index + 1), 'grado massimo tentato', 2 * (M_tot - 1))
+    if ifprintfinal: print('numero di polinomi nella base ottimale: ', contabest, 'numero di dati', N)
+    if ifprintfinal: print('best alpha', alpha_vP[index])
+    if ifprintfinal: print('best betha', betha_vP[index])
+
+    return mN, SN, y_infer, sy_infer, SN.diagonal(), log_evidence_vP, Mv_list[index]
+
+
+def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprintfinal=True, nLbf=0):
     # grid e' la griglia di punti k.
     # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
     # N e' il numero di dati nel fit.
