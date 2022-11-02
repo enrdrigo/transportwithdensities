@@ -22,15 +22,15 @@ def computecorrheat(root, filename, filename_loglammps, nk, redor=False, nblock=
         np.save(root + 'vcm[1].npy', jfile.data['vcm[1]'])
         np.save(root + 'vcm[2].npy', jfile.data['vcm[2]'])
         np.save(root + 'temp.npy', jfile.data['Temp'])
-        flux = np.load(root + 'flux.npy')
+        flux = np.load(root + 'flux.npy') - np.load(root + 'flux.npy').mean()
         temp = np.load(root + 'temp.npy')
-        vcm_1 = np.load(root + 'vcm[1].npy') * inp['N']/2
-        vcm_2 = np.load(root + 'vcm[2].npy') * inp['N']/2
+        vcm_1 = np.load(root + 'vcm[1].npy') * inp['N']/2 - np.load(root + 'vcm[1].npy').mean() * inp['N']/2
+        vcm_2 = np.load(root + 'vcm[2].npy') * inp['N']/2 - np.load(root + 'vcm[2].npy').mean() * inp['N']/2
     else:
-        flux = np.load(root + 'flux.npy')
+        flux = np.load(root + 'flux.npy') - np.load(root + 'flux.npy').mean()
         temp = np.load(root + 'temp.npy')
-        vcm_1 = np.load(root + 'vcm[1].npy') * inp['N']/2
-        vcm_2 = np.load(root + 'vcm[2].npy') * inp['N']/2
+        vcm_1 = np.load(root + 'vcm[1].npy') * inp['N']/2 - np.load(root + 'vcm[1].npy').mean() * inp['N']/2
+        vcm_2 = np.load(root + 'vcm[2].npy') * inp['N']/2 - np.load(root + 'vcm[2].npy').mean() * inp['N']/2
     TEMPERATURE = temp.mean()
     h = molar.molar_enthalpy(root, filename, filename_loglammps, inp['size'].prod(), inp['N'], nblocks=12, UNITS=UNITS)
     hm = h.mean(axis=1).mean(axis=0)

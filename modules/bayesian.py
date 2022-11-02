@@ -197,7 +197,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
                 '-', alpha=0.5, color='red', label='bayesian regression fit ')
         ax.errorbar(np.linalg.norm(grid, axis=1) * k_min,
                     dataplot , datasigmaplot ,
-                    fmt='.', label='data from MD', color='red')
+                    fmt='.', label='data from MD', color='black')
         plt.tight_layout()
         plt.legend()
 
