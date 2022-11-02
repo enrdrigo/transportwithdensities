@@ -30,6 +30,24 @@ def generatesorteddata(data, nk):
     return sdata, grid
 
 
+def datainit(root, filename, nk):
+    data = np.transpose(np.loadtxt(root + filename))
+
+    sdata, grid = generatesorteddata(data, nk)
+
+    C = cubicarray(list(grid), pr=False)
+
+    dic, dics = datadicG(data[1], data[2], cubicharmonics.Gvecgenerateall(100)[1:])
+
+    gplot, dataplot, datasigmaplot = datiplot(C, dic, dics)
+
+    sd = np.array([dataplot, datasigmaplot])
+
+    k_min = data[0][0]
+
+    return data, grid, gplot, dataplot, datasigmaplot, sd, k_min
+
+
 def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, ifwarning=True, nLbp=0):
     # grid e' la griglia di punti k.
     # data sono i valori calcolati nella simualzione con la std dev dei dati.

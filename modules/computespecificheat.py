@@ -8,6 +8,7 @@ import os
 
 def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS):
     inp = initialize.getinitialize(filename, root, posox, nk, -1)
+    print('c_p and c_v in units of J/mol/K')
     if os.path.exists(root + filename_loglammps + '.npy'):
         s = np.load(root + filename_loglammps + '.npy', allow_pickle='TRUE').item()
     else:
@@ -47,8 +48,11 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS):
     std = tools.stdblock_parallel((enk * enk.conj()) * fac, ncpus=16)
     stdce = np.sqrt(std[:, 0, int(std.shape[2] / 2)])
 
+    G = tools.Ggeneratemodall(inp['number of k'], inp['size']) * 2 * np.pi
+
     res = {}
-    res = {'cp': cpk,
+    res = {'k': G,
+          'cp': cpk,
           'std cp': stdcp,
           'cv': cvk,
           'std cv': stdcv,
@@ -56,5 +60,19 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS):
           'std cp with partial enthalpies': stdcp_peth}
 
     np.save(root+'specieficheat.npy', res)
+
+    with open(inp['root'] + 'cp.out', 'w') as f:
+        for i in range(cpk.shape[1] - 1):
+            f.write(
+                '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(cpk)[i]) + '{}\n'.format(stdcp[i]))
+    with open(inp['root'] + 'cv.out', 'w') as f:
+        for i in range(cvk.shape[1] - 1):
+            f.write(
+                '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(cvk)[i]) + '{}\n'.format(stdcv[i]))
+
+    with open(inp['root'] + 'cpenth.out', 'w') as f:
+        for i in range(cp_peth.shape[1] - 1):
+            f.write(
+                '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(cp_peth)[i]) + '{}\n'.format(stdcp_peth[i]))
 
     return res
