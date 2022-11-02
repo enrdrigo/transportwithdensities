@@ -76,7 +76,7 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         nblock = nblocks[i]
 
         try:
-            diccorr=np.load(root+str(nblock)+'corr.npy').item()
+            diccorr=np.load(root+str(nblock)+'corr.npy', allow_pickle=True).item()
         except:
             computecorrheat(root, filename, filename_loglammps, nk, nblock=nblock, redor=False)
             diccorr = np.load(root + str(nblock) + 'corr.npy', allow_pickle=True).item()
