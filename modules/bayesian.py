@@ -188,7 +188,6 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
 
     if plot:
         import matplotlib.pyplot as plt
-        %matplotlib widget
         f, ax = plt.subplots()
         ax.fill_between(np.linalg.norm(gplot_0[:], axis=1) * k_min,
                         (y_infer + np.sqrt(sy_infer - 1)), (y_infer - np.sqrt(sy_infer - 1)),
