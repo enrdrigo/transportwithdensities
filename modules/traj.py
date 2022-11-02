@@ -94,7 +94,7 @@ def read_dump(root, filename, Np, ntry):
                 d = []
                 if index == Np + 9 -1:
                     dump.create_dataset('data', data=datisnap[np.newaxis, :, :], compression="gzip", chunks=True,
-                            maxshape=(None,datisnap.shape[0], datisnap.shape[1]))  # compression for float do not work well
+                            maxshape=(None,datisnap.shape[0], datisnap.shape[1]))
                 else:
                     dump['data'].resize((dump['data'].shape[0] + 1), axis=0)
                     dump['data'][-1] = datisnap
@@ -130,11 +130,11 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
     n2k = []
     ifprint = False
     G, Gmol, Gmod, Gmodmol = tools.Ggenerateall(nk, Np, L, natpermol)
-    with open(root + 'output.out', 'a') as g:
+    with open(root + 'readtraj.out', 'w') as g:
         print('start the computation of the fourier transform of the densities')
         g.write('start the computation of the fourier transform of the densities\n')
     with h5py.File(root + 'dump.h5', 'r') as dump:
-        print('tempo di apertira', time.time() - start0)
+        print('opening time for the h5 file:', time.time() - start0)
         snap = [[] for i in range(dump['data'].len())]
 
         if os.path.exists(root + 'chk.pkl'):
@@ -182,12 +182,12 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
 
             #n2 -= len(list2[0]) / Np
 
-            warnings.warn('sto assumendo due specie solamente')
+            warnings.warn('sto assumendo due specie solamente!! modificare e rendere piu` generale')
 
             start2 = time.time()
 
             if ifprint:
-                print('tempo ricerca nel dizionario', start2 - start1)
+                print('snapshot time:', start2 - start1)
 
             poschO, pos = compute.computeposmol(Np, datisnap.transpose(), posox, natpermol)
 
@@ -202,7 +202,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
             start3 = time.time()
 
             if ifprint:
-                print('tempo calcolo funzioni', start3 - start2)
+                print('computation time:', start3 - start2)
 
             enklist, chklist \
                 = numbacomputekft((en_at[:] - emp[:]), (ch_at[:]), posatomic[:, :], pos_at[:, :], L, G, nk)
@@ -210,7 +210,6 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
             n1klist, n2klist \
                 = numbacomputekft(n1, n2, pos_at[:, :], pos_at[:, :], L, G, nk)
 
-            # enklist = nfft_adjoint(posatomic[:,0]/L, (en_at[:]- emp[:]), Np)
 
             enk.append(enklist)
 
@@ -223,12 +222,12 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
             start4 = time.time()
 
             if ifprint:
-                print('tempo calcolo ftk', start4 - start3)
+                print('computation of the Fourier transform:', start4 - start3)
 
             if int(len(chk) - 2) % int(len(snap) / 10) == 0:
                 print('got ' + str(len(chk)) + ' snapshot' + '({}%)'.format(int(len(chk) + 1) * 100 // len(snap) + 1))
                 print('average elapsed time per snapshot ', (time.time() - start0) / (1 + len(chk)-lenght))
-                with open(root + 'output.out', 'a') as z:
+                with open(root + 'readtraj.out', 'a') as z:
                     z.write('got ' + str(len(chk)) + ' snapshot' + '({}%)\n'.format(
                         int(len(chk) + 1) * 100 // len(snap) + 1))
                     z.write('average elapsed time per snapshot {}\n'.format((time.time() - start0) / (1 + len(chk)-lenght)))
@@ -237,7 +236,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
                     z.write('tempo calcolo ftk {}\n'.format(start4 - start3))
 
             if int(len(chk) + 1) % int(len(snap) / 4 + 1) == 0:
-                with open(root + 'output.out', 'a') as z:
+                with open(root + 'readtraj.out', 'a') as z:
                     with open(root + 'enk.pkl', 'wb+') as g:
                         pk.dump(enk, g)
                     with open(root + 'chk.pkl', 'wb+') as g:
@@ -262,7 +261,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
                     pk.dump(n1k, g)
                 with open(root + 'n2k.pkl', 'wb+') as g:
                     pk.dump(n2k, g)
-                with open(root + 'output.out', 'a') as g:
+                with open(root + 'readtraj.out', 'a') as g:
                     print('number of total snapshots is', len(chk))
                     print('done')
                     print('elapsed time: ', time.time() - start0)
@@ -271,7 +270,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
                 print('END COMPUTE NTRY')
                 return
 
-        with open(root + 'output.out', 'a') as g:
+        with open(root + 'readtraj.out', 'a') as g:
             print('number of total snapshots is', len(chk))
             print('done')
             print('elapsed time: ', time.time() - start0)

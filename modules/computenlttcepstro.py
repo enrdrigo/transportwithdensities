@@ -130,12 +130,12 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
 
     errrelchi=np.sqrt(v[int(19/20*len(v))])/(np.mean(chi))
 
-    tr = j.acfm[0] / (jf.cepf.tau_cutoffK * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
+    tr = np.pi*j.acfm[0] / (jf.cepf.tau_cutoffK * (2 * Gmod[k] * np.pi) ** 2) * fac / dt * (
         1e-10) ** 2 / 1e-12
     #print(np.mean(chi), j.acfm[0])
     #print((jf.cepf.tau_std_cutoffK / jf.cepf.tau_cutoffK * tr), (errrelchi*tr))
 
-    ertr=np.sqrt((jf.cepf.tau_std_cutoffK / jf.cepf.tau_cutoffK * tr)**2+(errrelchi*tr)**2)
+    ertr=np.pi*np.sqrt((jf.cepf.tau_std_cutoffK / jf.cepf.tau_cutoffK * tr)**2+(errrelchi*tr)**2)
 
     print('kpoint ', k,
           '\nkvalue ', 2 * Gmod[k] * np.pi *10, '1/nm',

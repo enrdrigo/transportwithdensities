@@ -4,6 +4,7 @@ from modules import tools
 from modules import molar
 import numpy as np
 import pickle as pk
+import os
 
 
 def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, filename_loglammps='log.lammps',
@@ -16,8 +17,12 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
 
     G = tools.Ggeneratemodall(inp['number of k'], inp['size']) * 2 * np.pi
 
-    log = molar.read_log_lammps(root=inp['root'],
-                                filename=filename_loglammps)
+    if not os.path.exists(root + filename_loglammps + '.npy'):
+        log = molar.read_log_lammps(root=inp['root'],
+                                    filename=filename_loglammps)
+    else:
+        log = np.load(root + filename_loglammps + '.npy', allow_pickle='TRUE').item()
+
 
     print(log['Temp'].mean(), 'K ', log['Temp'].std() / np.sqrt(len(log['Temp'])), 'K ',
           log['Press'].mean(), 'atm', log['Press'].std() / np.sqrt(len(log['Press'])), 'atm')
@@ -73,8 +78,8 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
     print('enthalpy contribution')
     print(-(np.mean((n1k * h[0] + n2k * h[1]) * np.conj(chk), axis=0) / G ** 2)[1] * fac)
 
-    np.savetxt(root+'convergenceenergy_charge.out', np.real((((enk) * np.conj(chk))/ G ** 2)[:, 1]) * fac)
-    np.savetxt(root + 'convergenceseebeck.out', np.real((((enk - n1k * h[0] - n2k * h[1]) * np.conj(chk)) / G ** 2)[:, 1]) * fac)
+    #np.savetxt(root+'convergenceenergy_charge.out', np.real((((enk) * np.conj(chk))/ G ** 2)[:, 1]) * fac)
+    #np.savetxt(root + 'convergenceseebeck.out', np.real((((enk - n1k * h[0] - n2k * h[1]) * np.conj(chk)) / G ** 2)[:, 1]) * fac)
     a = (np.mean((enk) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     b = -(np.mean((n1k * h[0] + n2k * h[1]) * np.conj(chk), axis=0) / G ** 2)[1:] * fac
     for i in range(1, chk.shape[1]):

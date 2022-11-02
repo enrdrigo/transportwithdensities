@@ -8,14 +8,14 @@ from scipy import signal
 
 def autocorr(x, y):
     result = signal.correlate(x, y, mode='full', method='fft')
-    v = [result[i] / (len(x) - abs(i - len(x) + 1))  for i in range(len(result))]
+    v = [result[i] / (len(x) - abs(i - len(x) + 1)) for i in range(len(result))]
     return np.array(v[int(result.size / 2):])
 
 def corr_loop(x, y, tinblock):
-    niterinblock=tinblock//300
+    niterinblock=tinblock//100
     corr = np.zeros(tinblock, dtype=np.complex_)
-    for i in range(0, tinblock, int(tinblock / niterinblock)):
-        corr += autocorr(x[i:tinblock+i],y[i:tinblock+i]) / niterinblock
+    for i in range(0, tinblock, niterinblock):
+        corr += autocorr(x[i:tinblock+i],y[i:tinblock+i]) / 100
     return corr
 def corr_parallel(x, y, nblocks, ncpus=1):
     tblock = int(len(x) / nblocks)

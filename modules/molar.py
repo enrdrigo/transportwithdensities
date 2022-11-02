@@ -12,9 +12,8 @@ def read_log_lammps(root, filename):
     print('Start read_log_lammps routine')
     start = time.time()
     print(
-        'Inizio la lettura del file log.lammps per le quantita` globali come energia totale, pressione temperatura \n' +
-        ' o entalpia. In output verra scritto un file python '
-        + root + filename +'.npy' + ' con un dizionario')
+        'Starting the reading for the file '+filename+' with tehrnodynamic quatities like total energy, temperature, pressure or enthalpy. The ouput file is a dictionary saved in '
+        + root + filename +'.npy')
     datadic = {}
     with open(root + filename, 'r') as f:
 
@@ -57,13 +56,18 @@ def read_log_lammps(root, filename):
 
 def molar(root, filename, Np, nblocks):
     start = time.time()
+
+    with open(root + 'molaroutput.out', 'w') as g:
+        g.write('Start molar routine\n')
+        g.write('The routine reads the dump.h5 file with the unscaled atomic positions and energies per atom.\n ' +
+          'Computes the partial volumes (in units of the volume per particle) and the partial energies as described by Pablo Debenedetti.')
     print('Start molar routine')
-    print('La routine legge il file dump.h5 con posizioni NON SCALATE e le energie per atomo.\n ' +
-          'Calcola i volumi parziali (un unita` del volume per particella) e le energie parziali.')
+    print('The routine reads the dump.h5 file with the unscaled atomic positions and energies per atom.\n ' +
+          'Computes the partial volumes (in units of the volume per particle) and the partial energies as described by Pablo Debenedetti.')
     if os.path.exists(root + 'dump.h5'):
         pass
     else:
-        raise ValueError('crea il file dump.h5!! con la routine read_dump')
+        raise ValueError('dump.h5 file not available! create it with the routine read_dump')
 
     L, L_min = initialize.getBoxboundary(filename,
                                          root)
@@ -73,8 +77,7 @@ def molar(root, filename, Np, nblocks):
         fetta = {'x': 0, 'y': 1, 'z': 2}
         portions = ['x', 'y', 'z']
         startr = time.time()
-        snap = [[] for i in range(dump['data'].len())]  
-        print('letta la lista delle chiavi del file h5py in {}'.format(time.time()-startr))
+        snap = [[] for i in range(dump['data'].len())]
         startr = time.time()
         energies = np.zeros((len(snap), len(portions)))
         enmean = np.zeros(len(snap))
@@ -88,6 +91,8 @@ def molar(root, filename, Np, nblocks):
         for i in range(1, len(snap) + 1):
 
             if i % int(len(snap) / 10) == 0:
+                with open(root + 'molaroutput.out', 'a') as g:
+                    g.write(str((i * 100) // len(snap)) + '% done in {}'.format(time.time()-startr))
                 print((i * 100) // len(snap), '% done in {}'.format(time.time()-startr))
                 startr=time.time()
 
@@ -194,17 +199,29 @@ def molar(root, filename, Np, nblocks):
 
         #ub ha le dimensioni #blocchi, #fetta, #specie
         ub[b] = u
-
-    print('volumi parizali',
+    with open(root + 'molaroutput.out', 'a') as g:
+        g.write('partial volumes' +
+          str(vb.mean(axis=1).mean(axis=0)) +
+          ', \n euler relation for the partial volumes:' +
+          str(np.sum(vb.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
+        g.write('partial energies' +
+          str(ub.mean(axis=1).mean(axis=0)) +
+          ', \n euler relations for the partial energies:' +
+          str(enmean.mean() / Np) +
+          str(np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
+        g.write('mean energies per species:' + str(enm1.mean()) + str(enm2.mean()))
+        g.write('elapsed time: ' + str(time.time() - start))
+        g.write('End molar routine')
+    print('partial volumes',
           vb.mean(axis=1).mean(axis=0),
-          ', \n relazione di eulero per i volumi  parziali',
+          ', \n euler relation for the partial volumes:',
           np.sum(vb.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0))
-    print('energie parziali',
+    print('partial energies',
           ub.mean(axis=1).mean(axis=0),
-          ', \n relazione di eulero per le energie parziali',
+          ', \n euler relations for the partial energies:',
           enmean.mean() / Np,
           np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0))
-    print('energie medie per specie', enm1.mean(), enm2.mean())
+    print('mean energies per species:', enm1.mean(), enm2.mean())
     print('elapsed time: ', time.time() - start)
     print('End molar routine')
     return vb, ub, xb
@@ -219,10 +236,10 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     start=time.time()
     volumepp = volume / Np
     if os.path.exists(root + filename_log + '.npy'):
-        pass
+        dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
     else:
-        raise ValueError('crea il file log.lammps.npy!! con la routine read_log_lammps')
-    dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
+        dic_data_log = read_log_lammps(root=root,
+                                    filename=filename_log)
 
     print(dic_data_log.keys())
 
@@ -231,44 +248,44 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
                  Np,
                  nblocks)
 
-    warnings.warn('conversione atm*\AA**3_to_Kcal/mol, lammps real units')
-    warnings.warn('disponibile anche conversione bar*\AA**3_to_eV, lammps metal units')
+    warnings.warn('conversion atm*\AA**3_to_Kcal/mol, lammps real units')
+    warnings.warn('conversion bar*\AA**3_to_eV, lammps metal units')
 
     facreal = 1.0125e5 / 1.0e30 * 6.022e23 / 4186
     facmetal = 1e5 / 1.0e30 / 1.60218e-19
     faclj = 1
-    if UNITS=='metal':
+    if UNITS == 'metal':
         fac = facmetal
-    if UNITS=='real':
+    if UNITS == 'real':
         fac = facreal
-    if UNITS=='lj':
+    if UNITS == 'lj':
         fac = faclj
 
     h = u + np.mean(dic_data_log['Press']) * volumepp * v * fac
 
     eru = u.mean(axis=1).std(axis=0) / u.mean(axis=1).mean(axis=0) / np.sqrt(3 * nblocks)
-    print('errore relativo percentuale energie parziali %',
+    print('relative percentage std of the partial eneergies %',
           eru / u.mean(axis=1).mean(axis=0) * 100)
 
     errvol = v.mean(axis=1).std(axis=0) / v.mean(axis=1).mean(axis=0) / np.sqrt(3 * nblocks)
-    print('errore relativo percentuale volumi parziali %',
+    print('relative percentage std of the partial volumes %',
           errvol * 100)
 
     errpress = (dic_data_log['Press']).std() / dic_data_log['Press'].mean() / np.sqrt(len(dic_data_log['Press']))
-    print('errore relativo percentuale pressione %',
+    print('relative percentage std of the pressure %',
           (dic_data_log['Press']).std() / dic_data_log['Press'].mean() * 100 / np.sqrt(len(dic_data_log['Press'])))
 
     PV = (np.mean(dic_data_log['Press']) * volumepp * v * fac).mean(axis=1).mean(axis=0)
-    print('contributo alla entalpia parziale di PV',
+    print('PV contribution to the partial enthalpies',
           PV)
 
-    print('entalpe parziali ',
+    print('partial enthalpies ',
           h.mean(axis=1).mean(axis=0),
-          ',\n relazione di eulero per le entalpie parziali',
+          ',\n Euler relation for the partial enthalpies',
           h.mean(axis=1).mean(axis=0)[0]*x.mean(axis=1).mean(axis=0)[0] + h.mean(axis=1).mean(axis=0)[1] *x.mean(axis=1).mean(axis=0)[1],
           (np.mean(dic_data_log['TotEng']) + np.mean(dic_data_log['Press']) * volume * fac) / Np)
 
-    print('errore entalpia parziali', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
+    print('std partial enthalpies', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
     print('Elapsed time', time.time() - start)
     print('End molar_enthalpy routine')
 
