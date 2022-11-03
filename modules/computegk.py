@@ -70,8 +70,7 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
     hetpgkc = [[] for i in nblocks]
     hestdtpgkc = [[] for i in nblocks]
     tau = [[] for i in nblocks]
-    temp = np.load(root + 'temp.npy')
-    TEMPERATURE = temp.mean()
+
     for i in range(len(nblocks)):
         nblock = nblocks[i]
 
@@ -80,7 +79,8 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         except:
             computecorrheat(root, filename, filename_loglammps, nk, nblock=nblock, redor=False)
             diccorr = np.load(root + str(nblock) + 'corr.npy', allow_pickle=True).item()
-
+        temp = np.load(root + 'temp.npy')
+        TEMPERATURE = temp.mean()
         cec[i] = diccorr['heat charge currents time correlation']
         ccc[i] = diccorr['charge charge currents time correlation']
 
