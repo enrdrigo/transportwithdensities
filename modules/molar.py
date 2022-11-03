@@ -238,6 +238,8 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
 
     if os.path.exists(root + 'molar.npy'):
         res = np.load(root + 'molar.npy', allow_pickle=True).item()
+        print('partial enthalpies ',
+              res['molar enthalpies'].mean(axis=1).mean(axis=0))
         return res['molar enthalpies']
     else: pass
     if os.path.exists(root + filename_log + '.npy'):

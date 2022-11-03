@@ -38,17 +38,12 @@ def computegkflux(root, filename, nk, flux1, flux2, nblocks=[40]):
 
         tau = len(c[i][0, :])
 
-        # GK
-        trc[i] = np.cumsum(c[i][:, :], axis=1)
-
-        stdc[i] = tools.stdblock_parallel(trc[i].T, ncpus=ncpus)
-
         # HE
         hetrc[i] = np.zeros((nblock, int(tau)))
         start = time.time()
         gkc = np.cumsum(c[i][:, :], axis=1)
         t[i] = np.linspace(0, tau, tau)
-        hc = np.cumsum(c[i][:, :] * t, axis=1)
+        hc = np.cumsum(c[i][:, :] * t[i], axis=1)
 
         # HE : \int_0^\tau <j(t)j(0)>(1-t/\tau)
         for j in range(1, int(tau)):
