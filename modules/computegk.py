@@ -52,7 +52,7 @@ def computegkflux(root, filename, outname, nk, flux1, flux2, nblocks=[40], ncpus
 
         # HE : \int_0^\tau <j(t)j(0)>(1-t/\tau)
         for j in range(1, int(tau)):
-            hetrc[i][:, j] = (gkc[:, (j - 1)] - hc[:, (j - 1)] / j - c[i][:, (j - 1)] * (1.0 - (j - 1.0) / j) / 2)
+            hetrc[i][:, j] = (gkc[:, (j - 1)] - hc[:, (j - 1)] / j + c[i][:, 0] / 2)
 
 
         hestdc[i] = tools.stdblock_parallel(hetrc[i].T, ncpus=ncpus)
