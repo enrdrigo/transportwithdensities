@@ -21,11 +21,13 @@ def corr_parallel(x, y, nblocks, ncpus=1):
     tblock = int(len(x) / nblocks)
     tinblock = int(tblock / 2)
     print('snap per block', tinblock)
+    start = time.time()
     with Pool(ncpus) as p:
         inputs = [(x[(tblock * i):(tblock * (i+1))],
                   y[(tblock * i):(tblock * (i+1))],
                   tinblock) for i in range(nblocks)]
         result = p.starmap(corr_loop, inputs)
+    print('time correlation done in ', time.time() - start)
     return np.array(result)
 
 def stdblock(array):
@@ -50,7 +52,7 @@ def stdblock_parallel(x, ncpus=1):
     with Pool(ncpus) as p:
         inputs = [(x[i],) for i in range(np.shape(x)[0])]
         result = p.starmap(stdblock, inputs)
-    print('done in ', time.time()-start)
+    print('variance from block analysis done in ', time.time()-start)
     return np.array(result)
 
 def Ggeneratemod(nk):
