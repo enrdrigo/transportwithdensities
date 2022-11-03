@@ -63,10 +63,10 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
 
     if UNITS == 'metal':
         fac = (16.022 * 1.0e-30 * 1.60218e-19 * 1.0e-10 /
-               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))
+               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))/4/np.pi
     if UNITS == 'real':
         fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 /
-               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))
+               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))/4/np.pi
     if UNITS == 'lj':
         fac = (1/(inp['size'].prod() * log['Temp'].mean() ** 2))
 
