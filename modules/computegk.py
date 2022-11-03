@@ -20,7 +20,7 @@ def computecorrflux(root, filename, nk, flux1, flux2, nblock=40):
                                 nblock, ncpus=ncpus))
     return c
 
-def computegkflux(root, filename, filename_loglammps, nk, flux1, flux2, nblocks=[40]):
+def computegkflux(root, filename, nk, flux1, flux2, nblocks=[40]):
     ncpus = 40
 
     c = [[] for i in nblocks]
