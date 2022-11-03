@@ -39,7 +39,8 @@ def computegkflux(root, filename, outname, nk, flux1, flux2, nblocks=[40], ncpus
             res = np.load(root+outname+'.npy', allow_pickle=True).item()
             c[i] = res['correlation function']
             res = 0
-        c[i] = computecorrflux(root, filename, outname, nk, flux1, flux2, nblock=nblock, ncpus=ncpus)
+        else:
+            c[i] = computecorrflux(root, filename, outname, nk, flux1, flux2, nblock=nblock, ncpus=ncpus)
 
         tau = len(c[i][0, :])
 
