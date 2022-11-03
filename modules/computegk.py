@@ -10,6 +10,60 @@ from multiprocessing import Pool
 import time
 import os
 
+def computecorrflux(root, filename, nk, flux1, flux2, nblock=40):
+    inp = initialize.getinitialize(filename, root, 0, nk, -1)
+    print('DEFAULT: METAL UNITS')
+
+    ncpus = 40
+    c = np.real(tools.corr_parallel(np.mean(flux1.T, axis=0),
+                                np.mean(flux2.T, axis=0),
+                                nblock, ncpus=ncpus))
+    return c
+
+def computegkflux(root, filename, filename_loglammps, nk, flux1, flux2, nblocks=[40]):
+    ncpus = 40
+
+    c = [[] for i in nblocks]
+    trc = [[] for i in nblocks]
+    stdc = [[] for i in nblocks]
+    hetrc = [[] for i in nblocks]
+    hestdc = [[] for i in nblocks]
+    t = [[] for i in nblocks]
+
+    for i in range(len(nblocks)):
+        nblock = nblocks[i]
+
+
+        c[i] = computecorrflux(root, filename, nk, flux1, flux2, nblock=nblock)
+
+        tau = len(c[i][0, :])
+
+        # GK
+        trc[i] = np.cumsum(c[i][:, :], axis=1)
+
+        stdc[i] = tools.stdblock_parallel(trc[i].T, ncpus=ncpus)
+
+        # HE
+        hetrc[i] = np.zeros((nblock, int(tau)))
+        start = time.time()
+        gkc = np.cumsum(c[i][:, :], axis=1)
+        t[i] = np.linspace(0, tau, tau)
+        hc = np.cumsum(c[i][:, :] * t, axis=1)
+
+        # HE : \int_0^\tau <j(t)j(0)>(1-t/\tau)
+        for j in range(1, int(tau)):
+            hetrc[i][:, j] = (gkc[:, (j - 1)] - hc[:, (j - 1)] / j - c[i][:, (j - 1)] * (1.0 - (j - 1.0) / j) / 2)
+
+        print(time.time() - start)
+
+        hestdc[i] = tools.stdblock_parallel(hetrc[i].T, ncpus=ncpus)
+
+    res = {}
+    res = {'time': t,
+           'cc_onsager': hetrc,
+           'cc_std': hestdc}
+    return res
+
 def computecorrheat(root, filename, filename_loglammps, nk, redor=False, nblock=40, UNITS='metal'):
     inp = initialize.getinitialize(filename, root, 0, nk, -1)
     print('DEFAULT: METAL UNITS')
