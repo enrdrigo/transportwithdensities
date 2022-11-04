@@ -164,8 +164,8 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
 
     # HE : \int_0^\tau <j(t)j(0)>(1-t/\tau)
         for j in range(1, int(tau[i])):
-            hetrec[i][:, j] = -(gkec[:, (j - 1)] - hec[:, (j - 1)] / j - cec[i][:, (j - 1)] * (1 - (j - 1) / j) / 2) / TEMPERATURE
-            hetrcc[i][:, j] = gkcc[:, (j - 1)] - hcc[:, (j - 1)] / j - ccc[i][:, (j - 1)] * (1 - (j - 1) / j) / 2
+            hetrec[i][:, j] = -(gkec[:, (j - 1)] - hec[:, (j - 1)] / j + cec[i][:, 0] / 2) / TEMPERATURE
+            hetrcc[i][:, j] = gkcc[:, (j - 1)] - hcc[:, (j - 1)] / j + ccc[i][:, 0] / 2
 
         print(time.time() - start)
 
