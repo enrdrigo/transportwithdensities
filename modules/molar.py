@@ -15,6 +15,10 @@ def read_log_lammps(root, filename):
         'Starting the reading for the file '+filename+' with tehrnodynamic quatities like total energy, temperature, pressure or enthalpy. The ouput file is a dictionary saved in '
         + root + filename +'.npy')
     datadic = {}
+    if os.path.exists(root + filename + '.npy'):
+        datadic=np.load(root + filename + '.npy', allow_pickle=True).item()
+        return datadic
+
     with open(root + filename, 'r') as f:
 
         startcollect = False
