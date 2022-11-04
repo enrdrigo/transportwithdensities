@@ -124,3 +124,45 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
                 '{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(a + b)[i]) + '{}\n'.format(np.sqrt(va + vb)[i]))
     return
 
+def kcorr( ak, bk, filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, filename_loglammps='log.lammps',
+            plot=False, UNITS='metal', nblocks=12):
+    inp = initialize.getinitialize(filename=filename,
+                                   root=root,
+                                   posox=posox,
+                                   nk=nk,
+                                   ntry=ntry)
+
+    G = tools.Ggeneratemodall(inp['number of k'], inp['size']) * 2 * np.pi
+
+    if not os.path.exists(root + filename_loglammps + '.npy'):
+        log = molar.read_log_lammps(root=inp['root'],
+                                    filename=filename_loglammps)
+    else:
+        log = np.load(root + filename_loglammps + '.npy', allow_pickle='TRUE').item()
+
+
+    print(log['Temp'].mean(), 'K ', log['Temp'].std() / np.sqrt(len(log['Temp'])), 'K ',
+          log['Press'].mean(), 'atm', log['Press'].std() / np.sqrt(len(log['Press'])), 'atm')
+
+
+    a = np.zeros(ak.shape[1] - 1, np.complex_)
+    va = np.zeros(ak.shape[1] - 1)
+
+    if UNITS == 'metal':
+        fac = (16.022 * 1.0e-30 * 1.60218e-19 * 1.0e-10 /
+               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))/4/np.pi
+    if UNITS == 'real':
+        fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 /
+               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))/4/np.pi
+    if UNITS == 'lj':
+        fac = (1/(inp['size'].prod() * log['Temp'].mean() ** 2))
+
+    face = (16.022 * 1.0e-20 * 1.0e-10) * (16.022 * 1.0e-20 * 1.0e-10)/ (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() * 8.854 * 1.0e-12)
+
+    a = (np.mean((ak) * np.conj(bk), axis=0) / G ** 2)[1:] * fac
+    for i in range(1, ak.shape[1]):
+        std, bins = tools.stdblock(fac * (ak[:, i]) * np.conj(bk[:, i]) / G[i] ** 2)
+        pp = int(16 * len(std) / 20)
+        va[i - 1] = std[pp]
+
+    return a, va
