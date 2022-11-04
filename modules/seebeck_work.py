@@ -140,9 +140,8 @@ def kcorr( ak, bk, filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntr
 
 
     a = (np.mean((ak) * np.conj(bk), axis=0) / G ** 2)[1:]
-    for i in range(1, ak.shape[1]):
-        std, bins = tools.stdblock((ak[:, i]) * np.conj(bk[:, i]) / G[i] ** 2)
-        pp = int(16 * len(std) / 20)
-        va[i - 1] = std[pp]
 
-    return a, va
+    stdc = tools.stdblock_parallel(((ak[:, 1:]) * np.conj(bk[:, 1:]) / G[1:] ** 2).T, ncpus=40)
+    std = stdc[:, 0, int(stdc.shape[2]/2)]
+
+    return a, std
