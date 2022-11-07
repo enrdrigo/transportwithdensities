@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from modules import initialize
 from modules import tools
 from modules import molar
+from modules import bayesian
 import numpy as np
 import pickle as pk
 import os
@@ -145,3 +146,37 @@ def kcorr( ak, bk, filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntr
     std = stdc[:, 0, int(stdc.shape[2]/2)]
 
     return a, std
+
+
+def convergence(list, tr=1.0):
+    for i in range(2, len(list)):
+        if abs((list[i] - list[i - 1]) / list[i - 1]) * 100 < tr:
+            return i
+
+def seebeck_best_converged(gplot, sd, k_min, tr=0.1):
+    N_max = 33
+    N_iter = 1
+    N_min = 2
+    predb = []
+    spredb = []
+    Npointsb = []
+    degreeb = []
+    ev_maxb = []
+    for N in range(N_min, N_max, N_iter):
+
+        try:
+            mN, SN, y_infer_, sy_infer_, spar_, log_evidence_vP_, mv = \
+                bayesian.bestfit(gplot[:, :] * k_min / 10, sd[:, :], N + 1, gplot[: N + 1, :].T * k_min / 10,
+                                 ifbetha=False, ifprintbestfit=False, ifprintfinal=False,
+                                 nLbf=0)
+        except ValueError:
+            continue
+        degreeb.append(mv)
+        Npointsb.append(np.linalg.norm(gplot[N]))
+        predb.append(mN[0])
+        spredb.append(SN[0, 0])
+
+        ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
+    index = convergence(ev_maxb, tr=tr)
+    print(index, 'index of the best seebeck prediction')
+    return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
