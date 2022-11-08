@@ -47,13 +47,13 @@ def computegkflux(root, filename, outname, nk, flux1, flux2, nblocks=[40], ncpus
         # HE
         hetrc[i] = np.zeros((nblock, int(tau)))
         start = time.time()
-        gkc = np.cumsum(c[i][:, :], axis=1)
-        t[i] = np.linspace(0, tau, tau)
-        hc = np.cumsum(c[i][:, :] * t[i], axis=1)
+        gkc = np.cumsum(c[i][:, 1:], axis=1)
+        t[i] = np.linspace(1, tau, tau-1)
+        hc = np.cumsum(c[i][:, 1:] * t[i], axis=1)
 
         # HE : \int_0^\tau <j(t)j(0)>(1-t/\tau)
-        for j in range(1, int(tau)):
-            hetrc[i][:, j] = (gkc[:, (j - 1)] - hc[:, (j - 1)] / j + c[i][:, 0] / 2)
+        for j in range(1, int(tau - 1)):
+            hetrc[i][:, j - 1] = (gkc[:, j - 1] - hc[:, j - 1] / j + c[i][:, 0] / 2)
 
 
         hestdc[i] = tools.stdblock_parallel(hetrc[i].T, ncpus=ncpus)
@@ -123,7 +123,7 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
     hestdcc = [[] for i in nblocks]
     hetpgkc = [[] for i in nblocks]
     hestdtpgkc = [[] for i in nblocks]
-    tau = [[] for i in nblocks]
+    t = [[] for i in nblocks]
 
     for i in range(len(nblocks)):
         nblock = nblocks[i]
@@ -139,7 +139,7 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         ccc[i] = diccorr['charge charge currents time correlation']
         diccorr = 0
 
-        tau[i] = len(ccc[i][0, :])
+        tau = len(ccc[i][0, :])
 
         # GK
         trec[i] = -np.cumsum(cec[i][:, :], axis=1) / TEMPERATURE
@@ -153,19 +153,19 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
                               stdcc[i][:, 0, 0] * trec[i].mean(axis=0) ** 2 / trcc[i].mean(axis=0) ** 4)
 
         # HE
-        hetrec[i] = np.zeros((nblock, int(tau[i])))
-        hetrcc[i] = np.zeros((nblock, int(tau[i])))
+        hetrec[i] = np.zeros((nblock, int(tau)))
+        hetrcc[i] = np.zeros((nblock, int(tau)))
         start = time.time()
-        gkec = np.cumsum(cec[i][:, :], axis=1)
-        gkcc = np.cumsum(ccc[i][:, :], axis=1)
-        t = np.linspace(0, tau[i], tau[i])
-        hec = np.cumsum(cec[i][:, :] * t, axis=1)
-        hcc = np.cumsum(ccc[i][:, :] * t, axis=1)
+        gkec = np.cumsum(cec[i][:, 1:], axis=1)
+        gkcc = np.cumsum(ccc[i][:, 1:], axis=1)
+        t[i] = np.linspace(1, tau, tau - 1)
+        hec = np.cumsum(cec[i][:, 1:] * t[i], axis=1)
+        hcc = np.cumsum(ccc[i][:, 1:] * t[i], axis=1)
 
     # HE : \int_0^\tau <j(t)j(0)>(1-t/\tau)
-        for j in range(1, int(tau[i])):
-            hetrec[i][:, j] = -(gkec[:, (j - 1)] - hec[:, (j - 1)] / j + cec[i][:, 0] / 2) / TEMPERATURE
-            hetrcc[i][:, j] = gkcc[:, (j - 1)] - hcc[:, (j - 1)] / j + ccc[i][:, 0] / 2
+        for j in range(1, int(tau - 1)):
+            hetrec[i][:, j - 1] = -(gkec[:, j - 1] - hec[:, j - 1] / j + cec[i][:, 0] / 2) / TEMPERATURE
+            hetrcc[i][:, j - 1] = gkcc[:, j - 1] - hcc[:, j - 1] / j + ccc[i][:, 0] / 2
 
         print(time.time() - start)
 
@@ -176,13 +176,13 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         hestdtpgkc[i] = np.sqrt(hestdec[i][:, 0, 0] / hetrcc[i].mean(axis=0) ** 2 + \
                                 hestdcc[i][:, 0, 0] * hetrec[i].mean(axis=0) ** 2 / hetrcc[i].mean(axis=0) ** 4)
 
-        res={}
-        res={'time': t,
-            'cc_onsager': hetrcc,
-            'cc_std': hestdcc ,
-            'ec_onsager': hetrec,
-            'ec_std': hestdec,
-            'ec_cc_ratio_onsager': hetpgkc,
-            'ec_cc_ratio_std': hestdtpgkc}
+    res={}
+    res={'time': t,
+        'cc_onsager': hetrcc,
+        'cc_std': hestdcc ,
+        'ec_onsager': hetrec,
+        'ec_std': hestdec,
+        'ec_cc_ratio_onsager': hetpgkc,
+        'ec_cc_ratio_std': hestdtpgkc}
 
     return res
