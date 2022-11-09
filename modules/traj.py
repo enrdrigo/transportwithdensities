@@ -8,6 +8,7 @@ import h5py
 import os
 import logging
 import warnings
+from multiprocessing import Pool
 
 
 def read_dump(root, filename, Np, ntry):
@@ -120,6 +121,78 @@ def read_dump(root, filename, Np, ntry):
         print('END READ FILE GOOD')
         dump.close()
         return
+
+
+def computeekft_parallel(f, x, G, ncpus=10):
+    start = time.time()
+    with Pool(ncpus) as p:
+        inputs = [(f, x, G[i]) for i in range(np.shape(G)[0])]
+        result = p.starmap(computeekft, inputs)
+    print('kft of energy density done in ', time.time() - start)
+    return np.array(result).T
+
+
+def computeekft(f, x, G):
+    exp = (x[:, :, :] * G[np.newaxis, :, :]).sum(axis=2)
+    ent = f.sum(axis=2)
+
+    entot = ent.sum(axis=1)
+
+    #kft_ = ((ent[:, :] - entot[:, np.newaxis] / inp['N']) * np.exp(-1j * 2 * np.pi * exp)).sum(axis=1)
+    kft_=((ent[:, :])*np.exp(-1j*2*np.pi*exp)).sum(axis=1)
+
+    return kft_
+
+
+def computechkft_parallel(f, x, G, ncpus=10):
+    start = time.time()
+    with Pool(ncpus) as p:
+        inputs = [(f, x, G[i]) for i in range(np.shape(G)[0])]
+        result = p.starmap(computechkft, inputs)
+    print('kft of charge density done in ', time.time() - start)
+    return np.array(result).T
+
+
+def computechkft(f, x, G):
+    exp = (x[:, :, :] * G[np.newaxis, :, :]).sum(axis=2)
+
+    kft_ = ((f[:, :]) * np.exp(-1j * 2 * np.pi * exp)).sum(axis=1)
+
+    return kft_
+
+
+def computen1kft_parallel(f, x, G, ncpus=10):
+    start = time.time()
+    with Pool(ncpus) as p:
+        inputs = [(f, x, G[i]) for i in range(np.shape(G)[0])]
+        result = p.starmap(computechkft, inputs)
+    print('kft of number (species 1) density done in ', time.time() - start)
+    return np.array(result).T
+
+
+def computen1kft(f, x, G):
+    exp = (x[:, :, :] * G[np.newaxis, :, :]).sum(axis=2)
+
+    kft_ = ((f[:, :]) * np.exp(-1j * 2 * np.pi * exp)).sum(axis=1)
+
+    return kft_
+
+
+def computen2kft_parallel(f, x, G, ncpus=10):
+    start = time.time()
+    with Pool(ncpus) as p:
+        inputs = [(f, x, G[i]) for i in range(np.shape(G)[0])]
+        result = p.starmap(computechkft, inputs)
+    print('kft of number (species 2) density done in ', time.time() - start)
+    return np.array(result).T
+
+
+def computen2kft(f, x, G):
+    exp = (x[:, :, :] * G[np.newaxis, :, :]).sum(axis=2)
+
+    kft_ = ((f[:, :]) * np.exp(-1j * 2 * np.pi * exp)).sum(axis=1)
+
+    return kft_
 
 
 def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):

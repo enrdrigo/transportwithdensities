@@ -17,8 +17,8 @@ def computecorrflux(root, filename, outname, nk, flux1, flux2, nblock=40, ncpus=
     c = np.real(tools.corr_parallel(np.mean(flux1.T, axis=0),
                                 np.mean(flux2.T, axis=0),
                                 nblock, ncpus=ncpus))
-    res={}
-    res={'correlation function': c}
+    res = {}
+    res = {'correlation function': c}
     np.save(root+outname+'.npy', res)
     return c
 
