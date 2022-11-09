@@ -139,7 +139,7 @@ def computeekft(f, x, G):
     entot = ent.sum(axis=1)
 
     #kft_ = ((ent[:, :] - entot[:, np.newaxis] / inp['N']) * np.exp(-1j * 2 * np.pi * exp)).sum(axis=1)
-    kft_=((ent[:, :])*np.exp(-1j*2*np.pi*exp)).sum(axis=1)
+    kft_ = ((ent[:, :])*np.exp(-1j*2*np.pi*exp)).sum(axis=1)
 
     return kft_
 

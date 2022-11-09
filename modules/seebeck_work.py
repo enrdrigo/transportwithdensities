@@ -140,7 +140,7 @@ def kcorr( ak, bk, filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntr
     va = np.zeros(ak.shape[1] - 1)
 
 
-    a = (np.mean((ak) * np.conj(bk), axis=0) / G ** 2)[1:]
+    a = (np.mean((ak - ak.mean(axis=0)) * np.conj(bk - bk.mean(axis=0)), axis=0) / G ** 2)[1:]
 
     stdc = tools.stdblock_parallel(((ak[:, 1:]) * np.conj(bk[:, 1:]) / G[1:] ** 2).T, ncpus=40)
     std = stdc[:, 0, int(stdc.shape[2]/2)]
