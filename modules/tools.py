@@ -6,6 +6,45 @@ from multiprocessing import Pool
 import os
 from scipy import signal
 
+
+def readarraydatah5py(root, filename, posox, nk):
+    inp = initialize.getinitialize(filename, root, posox, nk, -1)
+
+    g = h5py.File(root + 'dump.h5')
+
+    en = g['data'][1:, :, 6:8]
+
+    pos = g['data'][1:, :, 2:5]
+
+    list1 = np.where(g['data'][1:, :, 1] == 1)
+
+    n1 = np.zeros((pos.shape[0], inp['N']))
+
+    n1[list1] = 1
+
+    list2 = np.where(g['data'][1:, :, 1] == 2)
+
+    n2 = np.zeros((pos.shape[0], inp['N']))
+
+    n2[list2] = 1
+
+    ch = g['data'][1:, :, 5]
+
+    g.close()
+
+
+    G, Gmol, Gmod, Gmodmol = Ggenerateall(inp['number of k'], inp['N'], inp['size'], 1)
+
+    res = {}
+    res = {'pos': pos,
+           'energy density': en,
+           'number density species 1': n1,
+           'number density species 2': n2,
+           'charge density': ch,
+           'G vectors': G
+           }
+    return res
+
 def autocorr(x, y):
     result = signal.correlate(x, y, mode='full', method='fft')
     v = [result[i] / (len(x) - abs(i - len(x) + 1)) for i in range(len(result))]
