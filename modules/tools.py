@@ -7,7 +7,11 @@ import os
 from scipy import signal
 
 
-def readarraydatah5py(root, filename, posox, nk):
+def readarraydatah5py(root, filename, posox, nk, redor=True):
+    if os.path.exists(root+'readarraydatah5py.h5py') and not redor:
+        res = np.load(root+'readarraydatah5py.h5py', allow_pickle=True).item()
+        return res
+
     inp = initialize.getinitialize(filename, root, posox, nk, -1)
 
     g = h5py.File(root + 'dump.h5')
@@ -32,7 +36,6 @@ def readarraydatah5py(root, filename, posox, nk):
 
     g.close()
 
-
     G, Gmol, Gmod, Gmodmol = Ggenerateall(inp['number of k'], inp['N'], inp['size'], 1)
 
     res = {}
@@ -43,6 +46,8 @@ def readarraydatah5py(root, filename, posox, nk):
            'charge density': ch,
            'G vectors': G
            }
+
+    np.save(root + 'readarraydatah5py.h5py', res)
     return res
 
 def autocorr(x, y):

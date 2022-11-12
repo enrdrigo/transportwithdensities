@@ -227,7 +227,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
                 print('computation time:', start3 - start2)
 
             enklist, chklist \
-                = numbacomputekft((en_at[:] - emp[:]), (ch_at[:]), posatomic[:, :], pos_at[:, :], L, G, nk)
+                = numbacomputekft((en_at[:]), (ch_at[:]), posatomic[:, :], pos_at[:, :], L, G, nk)
 
             n1klist, n2klist \
                 = numbacomputekft(n1, n2, pos_at[:, :], pos_at[:, :], L, G, nk)
