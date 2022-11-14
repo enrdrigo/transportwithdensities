@@ -47,7 +47,7 @@ def readarraydatah5py(root, filename, posox, nk, redor=True):
            'G vectors': G
            }
 
-    np.save(root + 'readarraydatah5py.h5py', res)
+    np.save(root + 'readarraydatah5py', res)
     return res
 
 def autocorr(x, y):
