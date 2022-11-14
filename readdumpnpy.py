@@ -48,14 +48,14 @@ chka = traj.computescalarkft_parallel(f=dumpreadh5py['charge density'],
                                     outname='chka'
                                    )
 
-n1ka = traj.computescalarkft_parallel(f=dumpreadh5py['number density species 1'].sum(axis=2),
+n1ka = traj.computescalarkft_parallel(f=dumpreadh5py['number density species 1'],
                                     x=dumpreadh5py['pos'],
                                     G=dumpreadh5py['G vectors'],
                                     root=root,
                                     outname='n1ka'
                                    )
 
-n2ka = traj.computescalarkft_parallel(f=dumpreadh5py['number density species 2'].sum(axis=2),
+n2ka = traj.computescalarkft_parallel(f=dumpreadh5py['number density species 2'],
                                     x=dumpreadh5py['pos'],
                                     G=dumpreadh5py['G vectors'],
                                     root=root,
