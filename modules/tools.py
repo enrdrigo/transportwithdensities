@@ -8,8 +8,8 @@ from scipy import signal
 
 
 def readarraydatah5py(root, filename, posox, nk, redor=True):
-    if os.path.exists(root+'readarraydatah5py.h5py') and not redor:
-        res = np.load(root+'readarraydatah5py.h5py', allow_pickle=True).item()
+    if os.path.exists(root+'readarraydatah5py.npy') and not redor:
+        res = np.load(root+'readarraydatah5py.npy', allow_pickle=True).item()
         return res
 
     inp = initialize.getinitialize(filename, root, posox, nk, -1)
