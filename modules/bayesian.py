@@ -54,7 +54,7 @@ def convergence(list, tr=1):
             return i
 
 
-def seebeck_N(root, filename, nk, gplot, tr=1, plot=False):
+def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
 
     N_max = 32
     N_iter = 1
@@ -72,7 +72,6 @@ def seebeck_N(root, filename, nk, gplot, tr=1, plot=False):
             print('NOPE')
             continue
         degreeb.append(mv)
-        Npointsb.append(np.linalg.norm(gplot[N]))
         predb.append(mN[0])
         spredb.append(SN[0, 0])
 
