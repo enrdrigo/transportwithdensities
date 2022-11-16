@@ -66,6 +66,8 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
     ev_maxb = []
     for N in range(N_max, N_iter):
 
+        print(N)
+
         try:
             mN, SN, y_infer_, sy_infer_, spar, log_evidence_vP_, mv = bestfitdevel(root=root, filename=filename, nk=nk, N=N,
                                                                                    plot=plot)
