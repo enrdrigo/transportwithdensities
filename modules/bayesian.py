@@ -56,7 +56,7 @@ def convergence(list, tr=1):
 
 def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
 
-    N_max = 32
+    N_max = 20
     N_iter = 1
     predb = []
     spredb = []
