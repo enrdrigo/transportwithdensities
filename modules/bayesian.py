@@ -139,7 +139,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     alpha_vP = []
     betha_vP = []
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T*k_min
+    x = grid[:N, :].T*k_min/10
     # x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     Mv_list = []
