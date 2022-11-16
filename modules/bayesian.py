@@ -3,6 +3,7 @@ from numpy.linalg import eig
 from . import cubicharmonics
 import logging
 import copy
+import time
 
 def generatesorteddata(data, nk):
     G = cubicharmonics.Gvecgenerateall(nk)
@@ -55,7 +56,7 @@ def convergence(list, tr=1):
 
 
 def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
-
+    start = time.time()
     N_max = 20
     N_iter = 1
     predb = []
@@ -78,6 +79,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
         ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
     index = convergence(ev_maxb, tr=tr)
     print(index, 'index of the best seebeck prediction')
+    print('opitmalpredictiondataset done in '. time.time()-start)
     return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
 
 
