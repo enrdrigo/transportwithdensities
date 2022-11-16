@@ -48,6 +48,39 @@ def datainit(root, filename, nk):
     return data, grid, gplot, dataplot, datasigmaplot, sd, k_min
 
 
+def convergence(list, tr=1):
+    for i in range(2, len(list)):
+        if abs((list[i] - list[i - 1]) / list[i - 1]) * 100 < tr:
+            return i
+
+
+def seebeck_N(root, filename, nk, gplot, tr=1, plot=False):
+
+    N_max = 32
+    N_iter = 1
+    predb = []
+    spredb = []
+    Npointsb = []
+    degreeb = []
+    ev_maxb = []
+    for N in range(N_max, N_iter):
+
+        try:
+            mN, SN, y_infer_, sy_infer_, spar, log_evidence_vP_, mv = bestfitdevel(root=root, filename=filename, nk=nk, N=N,
+                                                                                   plot=True)
+        except ValueError:
+            continue
+        degreeb.append(mv)
+        Npointsb.append(np.linalg.norm(gplot[N]))
+        predb.append(mN[0])
+        spredb.append(SN[0, 0])
+
+        ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
+    index = convergence(ev_maxb, tr=tr)
+    print(index, 'index of the best seebeck prediction')
+    return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
+
+
 def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, ifwarning=True, nLbp=0):
     # grid e' la griglia di punti k.
     # data sono i valori calcolati nella simualzione con la std dev dei dati.

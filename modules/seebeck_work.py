@@ -37,23 +37,28 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
                               UNITS=UNITS)
 
     h = hp.mean(axis=0).mean(axis=0)
-
-    with open(inp['root'] + 'enk.pkl', 'rb') as g:
-        enkb = pk.load(g)
-        enk = np.array(enkb)
-        enkb = 0
-    with open(inp['root'] + 'chk.pkl', 'rb') as g:
-        chkb = pk.load(g)
-        chk = np.array(chkb)
-        chkb = 0
-    with open(inp['root'] + 'n1k.pkl', 'rb') as g:
-        n1kb = pk.load(g)
-        n1k = np.array(n1kb)
-        n1kb = 0
-    with open(inp['root'] + 'n2k.pkl', 'rb') as g:
-        n2kb = pk.load(g)
-        n2k = np.array(n2kb)
-        n2kb = 0
+    try:
+        enk = np.load(inp['root'] + 'enka.npy')
+        chk = np.load(inp['root'] + 'chka.npy')
+        n1k = np.load(inp['root'] + 'n1ka.npy')
+        n2k = np.load(inp['root'] + 'n2k.npy')
+    except:
+        with open(inp['root'] + 'enk.pkl', 'rb') as g:
+            enkb = pk.load(g)
+            enk = np.array(enkb)
+            enkb = 0
+        with open(inp['root'] + 'chk.pkl', 'rb') as g:
+            chkb = pk.load(g)
+            chk = np.array(chkb)
+            chkb = 0
+        with open(inp['root'] + 'n1k.pkl', 'rb') as g:
+            n1kb = pk.load(g)
+            n1k = np.array(n1kb)
+            n1kb = 0
+        with open(inp['root'] + 'n2k.pkl', 'rb') as g:
+            n2kb = pk.load(g)
+            n2k = np.array(n2kb)
+            n2kb = 0
 
     a = np.zeros(chk.shape[1] - 1, np.complex_)
     b = np.zeros(chk.shape[1] - 1, np.complex_)
@@ -64,10 +69,10 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
 
     if UNITS == 'metal':
         fac = (16.022 * 1.0e-30 * 1.60218e-19 * 1.0e-10 /
-               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))/4/np.pi
+               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))
     if UNITS == 'real':
         fac = (16.022 * 1.0e-30 * 4184 / 6.02214e23 * 1.0e-10 /
-               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))/4/np.pi
+               (inp['size'].prod() * 1.0e-30 * 1.38e-23 * log['Temp'].mean() ** 2 * 8.854 * 1.0e-12))
     if UNITS == 'lj':
         fac = (1/(inp['size'].prod() * log['Temp'].mean() ** 2))
 

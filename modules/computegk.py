@@ -68,6 +68,7 @@ def computecorrheat(root, filename, filename_loglammps, nk, redor=False, nblock=
     inp = initialize.getinitialize(filename, root, 0, nk, -1)
     print('DEFAULT: METAL UNITS')
     if not os.path.exists(root + 'flux.npy') or redor:
+        print('read file gklog.lammps')
         jfile = st.i_o.TableFile(root + 'gk' + filename_loglammps, group_vectors=True)
 
         jfile.read_datalines(start_step=0, NSTEPS=0, select_ckeys=['Temp', 'flux', 'Lx', 'vcm[1]', 'vcm[2]'])
@@ -129,7 +130,7 @@ def computegk(root, filename, filename_loglammps, nk, redor=False, nblocks=[40],
         nblock = nblocks[i]
 
         try:
-            diccorr=np.load(root+str(nblock)+'corr.npy', allow_pickle=True).item()
+            diccorr = np.load(root+str(nblock)+'corr.npy', allow_pickle=True).item()
         except:
             computecorrheat(root, filename, filename_loglammps, nk, nblock=nblock, redor=False)
             diccorr = np.load(root + str(nblock) + 'corr.npy', allow_pickle=True).item()

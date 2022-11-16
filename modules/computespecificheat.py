@@ -13,12 +13,37 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS, enthalpy
         s = np.load(root + filename_loglammps + '.npy', allow_pickle='TRUE').item()
     else:
         s = molar.read_log_lammps(root=root, filename=filename_loglammps)
-    with open(root + 'n1k.pkl', 'rb') as f:
-        n1k = np.array(pkl.load(f)).T[:, :]
-    with open(root + 'n2k.pkl', 'rb') as f:
-        n2k = np.array(pkl.load(f)).T[:, :]
-    with open(root + 'enk.pkl', 'rb') as f:
-        enk = np.array(pkl.load(f)).T[:, :]
+
+    try:
+        enk = np.load(inp['root'] + 'enka.npy').T
+        chk = np.load(inp['root'] + 'chka.npy').T
+        n1k = np.load(inp['root'] + 'n1ka.npy').T
+        n2k = np.load(inp['root'] + 'n2k.npy').T
+    except:
+        with open(inp['root'] + 'enk.pkl', 'rb') as g:
+            enkb = pkl.load(g)
+            enk = np.array(enkb).T
+            enkb = 0
+        with open(inp['root'] + 'chk.pkl', 'rb') as g:
+            chkb = pkl.load(g)
+            chk = np.array(chkb).T
+            chkb = 0
+        with open(inp['root'] + 'n1k.pkl', 'rb') as g:
+            n1kb = pkl.load(g)
+            n1k = np.array(n1kb).T
+            n1kb = 0
+        with open(inp['root'] + 'n2k.pkl', 'rb') as g:
+            n2kb = pkl.load(g)
+            n2k = np.array(n2kb).T
+            n2kb = 0
+
+    #with open(root + 'n1k.pkl', 'rb') as f:
+    #    n1k = np.array(pkl.load(f)).T[:, :]
+    #with open(root + 'n2k.pkl', 'rb') as f:
+    #    n2k = np.array(pkl.load(f)).T[:, :]
+    #with open(root + 'enk.pkl', 'rb') as f:
+    #    enk = np.array(pkl.load(f)).T[:, :]
+
     if enthalpy:
         h = molar.molar_enthalpy(root, filename, filename_loglammps, inp['size'].prod(), inp['N'], 12, UNITS=UNITS)
         hm = h.mean(axis=1).mean(axis=0)
