@@ -50,7 +50,6 @@ def datainit(root, filename, nk):
 
 def convergence(list, tr=1):
     for i in range(2, len(list)):
-        print(i)
         if abs((list[i] - list[i - 1]) / list[i - 1]) * 100 < tr:
             return i
 
@@ -64,14 +63,11 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
     Npointsb = []
     degreeb = []
     ev_maxb = []
-    for N in range(N_max, N_iter):
-
-        print(N)
+    for N in range(2, N_max, N_iter):
 
         try:
             mN, SN, y_infer_, sy_infer_, spar, log_evidence_vP_, mv = bestfitdevel(root=root, filename=filename, nk=nk, N=N,
                                                                                    plot=plot)
-            print('ooo')
         except ValueError:
             print('NOPE')
             continue
