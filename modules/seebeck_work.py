@@ -131,7 +131,7 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
     return
 
 def kcorr( ak, bk, filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, filename_loglammps='log.lammps',
-            plot=False, UNITS='metal', nblocks=12):
+            plot=False, UNITS='metal', nblocks=12, outname='kcorr.out'):
     inp = initialize.getinitialize(filename=filename,
                                    root=root,
                                    posox=posox,
@@ -149,6 +149,10 @@ def kcorr( ak, bk, filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntr
 
     stdc = tools.stdblock_parallel(((ak[:, 1:]) * np.conj(bk[:, 1:]) / G[1:] ** 2).T, ncpus=40)
     std = stdc[:, 0, int(stdc.shape[2]/2)]
+
+    with open(root + outname, 'w') as f:
+        for i in range(nk - 1):
+            f.write('{}\t'.format(G[i + 1] * 10) + '{}\t'.format(np.real(a)[i]) + '{}\n'.format(np.sqrt(np.real(std))[i]))
 
     return a, std
 
