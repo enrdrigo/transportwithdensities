@@ -69,6 +69,7 @@ def seebeck_N(root, filename, nk, gplot, tr=1, plot=False):
             mN, SN, y_infer_, sy_infer_, spar, log_evidence_vP_, mv = bestfitdevel(root=root, filename=filename, nk=nk, N=N,
                                                                                    plot=plot)
         except ValueError:
+            print('NOPE')
             continue
         degreeb.append(mv)
         Npointsb.append(np.linalg.norm(gplot[N]))
