@@ -35,7 +35,7 @@ def datainit(root, filename, nk):
 
     sdata, grid = generatesorteddata(data, nk)
 
-    C = cubicarray(list(grid), pr=True)
+    C = cubicarray(list(grid), pr=False)
 
     dic, dics = datadicG(data[1], data[2], cubicharmonics.Gvecgenerateall(100)[1:])
 
