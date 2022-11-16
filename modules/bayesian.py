@@ -50,6 +50,7 @@ def datainit(root, filename, nk):
 
 def convergence(list, tr=1):
     for i in range(2, len(list)):
+        print(i)
         if abs((list[i] - list[i - 1]) / list[i - 1]) * 100 < tr:
             return i
 
@@ -76,6 +77,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
         spredb.append(SN[0, 0])
 
         ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
+        print(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
     index = convergence(ev_maxb, tr=tr)
     print(index, 'index of the best seebeck prediction')
     return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
