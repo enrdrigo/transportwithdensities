@@ -79,6 +79,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
 
         ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
     index = convergence(ev_maxb, tr=tr)
+    if index==None: index=N_max
     print(index, 'index of the best seebeck prediction')
     print(Npointsb[index], 'optimal N')
     print('opitmalpredictiondataset done in ', time.time()-start)
