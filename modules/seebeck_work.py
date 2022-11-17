@@ -41,7 +41,7 @@ def seebeck(filename='dump.lammpstrj', root='./', posox='0.', nk=100, ntry=-1, f
         enk = np.load(inp['root'] + 'enka.npy')
         chk = np.load(inp['root'] + 'chka.npy')
         n1k = np.load(inp['root'] + 'n1ka.npy')
-        n2k = np.load(inp['root'] + 'n2k.npy')
+        n2k = np.load(inp['root'] + 'n2ka.npy')
     except:
         with open(inp['root'] + 'enk.pkl', 'rb') as g:
             enkb = pk.load(g)

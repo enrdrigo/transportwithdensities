@@ -55,7 +55,7 @@ def convergence(list, tr=1):
             return i
 
 
-def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
+def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
     start = time.time()
     N_max = 20
     N_iter = 1
@@ -80,6 +80,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False):
     index = convergence(ev_maxb, tr=tr)
     print(index, 'index of the best seebeck prediction')
     print('opitmalpredictiondataset done in ', time.time()-start)
+    if debug: print(predb)
     return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
 
 
