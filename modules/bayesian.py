@@ -72,6 +72,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
         except ValueError:
             print('NOPE')
             continue
+        Npointsb.append(N)
         degreeb.append(mv)
         predb.append(mN[0])
         spredb.append(SN[0, 0])
@@ -79,8 +80,10 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
         ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
     index = convergence(ev_maxb, tr=tr)
     print(index, 'index of the best seebeck prediction')
+    print(Npointsb[index], 'optimal N')
     print('opitmalpredictiondataset done in ', time.time()-start)
-    if debug: print(predb)
+    if debug:
+        print(predb)
     return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
 
 
