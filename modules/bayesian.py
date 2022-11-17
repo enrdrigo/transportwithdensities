@@ -129,14 +129,13 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
     # N e' il numero di dati nel fit.
     # x_infer sono i punti k dove voglio inferire il risultato.
-
     data, oldgrid, grid, dataplot, datasigmaplot, sdata, k_min = datainit(root=root, filename=filename, nk=nk)
 
     gplot_0 = np.copy(grid)
     gplot_0[0] = np.zeros(3) + 0.0001
     gplot_0 = (np.ones((100, 3)).T * np.linspace(0.01, np.linalg.norm(grid[N]), 100) / np.sqrt(3)).T
 
-    x_infer = gplot_0.T*k_min/10
+    x_infer = gplot_0.T
 
     M_tot = 15
     # M_tot e' il numero massimo del grado del polinomio che considero
@@ -144,6 +143,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     alpha_vP = []
     betha_vP = []
     g_vP = np.zeros((M_tot))
+    xt = grid[:, :].T*k_min/10
     x = grid[:N, :].T*k_min/10
     # x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
@@ -217,7 +217,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     index = log_evidence_vP.index(max(log_evidence_vP))
 
     # calcolo il fit bayesiano per il valore ottimale di alpha e per il grado che massimizza la evidence.
-    mN, SN, y_infer, sy_infer, contabest = bayesianpol(grid, sdata, Mv_list[index], N, alpha_vP[index], \
+    mN, SN, y_infer, sy_infer, contabest = bayesianpol(xt.T, sdata, Mv_list[index], N, alpha_vP[index], \
                                                        x_infer, bethapar=betha_vP[index], ifprint=ifprintfinal, \
                                                        ifwarning=False, nLbp=nLbf)
 
