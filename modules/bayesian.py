@@ -217,7 +217,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     index = log_evidence_vP.index(max(log_evidence_vP))
 
     # calcolo il fit bayesiano per il valore ottimale di alpha e per il grado che massimizza la evidence.
-    mN, SN, y_infer, sy_infer, contabest = bayesianpol(xt.T, sdata, Mv_list[index], N, alpha_vP[index], \
+    mN, SN, y_infer, sy_infer, contabest = bayesianpol(grid, sdata, Mv_list[index], N, alpha_vP[index], \
                                                        x_infer, bethapar=betha_vP[index], ifprint=ifprintfinal, \
                                                        ifwarning=False, nLbp=nLbf)
 
