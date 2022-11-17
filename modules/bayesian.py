@@ -136,7 +136,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     gplot_0[0] = np.zeros(3) + 0.0001
     gplot_0 = (np.ones((100, 3)).T * np.linspace(0.01, np.linalg.norm(grid[N]), 100) / np.sqrt(3)).T
 
-    x_infer = gplot_0.T
+    x_infer = gplot_0.T*k_min/10
 
     M_tot = 15
     # M_tot e' il numero massimo del grado del polinomio che considero
@@ -144,7 +144,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     alpha_vP = []
     betha_vP = []
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T*k_min
+    x = grid[:N, :].T*k_min/10
     # x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     Mv_list = []
