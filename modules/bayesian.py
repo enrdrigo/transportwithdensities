@@ -84,7 +84,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
     print(Npointsb[index], 'optimal N')
     print('opitmalpredictiondataset done in ', time.time()-start)
     if debug:
-        print(predb, ev_maxb)
+        print(predb[index], ev_maxb)
     return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
 
 
