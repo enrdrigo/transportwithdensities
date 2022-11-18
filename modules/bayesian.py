@@ -80,12 +80,12 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
         ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
     index = convergence(ev_maxb, tr=tr)
     if index==None: index=-1
-    print(index, 'index of the best seebeck prediction')
+    #print(index, 'index of the best seebeck prediction')
     print(Npointsb[index], 'optimal N')
     print('opitmalpredictiondataset done in ', time.time()-start)
     if debug:
         print(predb[index], ev_maxb)
-    return index, predb[index], np.sqrt(spredb[index]), degreeb[index]
+    return Npointsb[index], predb[index], np.sqrt(spredb[index]), degreeb[index]
 
 
 def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, ifwarning=True, nLbp=0):
