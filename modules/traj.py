@@ -307,6 +307,10 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
             pk.dump(n1k, g)
         with open(root + 'n2k.pkl', 'wb+') as g:
             pk.dump(n2k, g)
+        np.save(root + 'enka', np.array(enk))
+        np.save(root + 'chka', np.array(chk))
+        np.save(root + 'n1ka', np.array(n1k))
+        np.save(root + 'n2ka', np.array(n2k))
         print('END COMPUTE GOOD')
         return
 
