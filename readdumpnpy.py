@@ -41,6 +41,13 @@ enka = traj.computescalarkft_parallel(f=dumpreadh5py['energy density'].sum(axis=
                                     outname='enka'
                                    )
 
+enkina = traj.computescalarkft_parallel(f=dumpreadh5py['energy density'][0],
+                                    x=dumpreadh5py['pos'],
+                                    G=dumpreadh5py['G vectors'],
+                                    root=root,
+                                    outname='enkina'
+                                   )
+
 chka = traj.computescalarkft_parallel(f=dumpreadh5py['charge density'],
                                     x=dumpreadh5py['pos'],
                                     G=dumpreadh5py['G vectors'],
