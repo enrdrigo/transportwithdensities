@@ -18,7 +18,7 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS, enthalpy
         enk = np.load(inp['root'] + 'enka.npy').T
         chk = np.load(inp['root'] + 'chka.npy').T
         n1k = np.load(inp['root'] + 'n1ka.npy').T
-        n2k = np.load(inp['root'] + 'n2k.npy').T
+        n2k = np.load(inp['root'] + 'n2ka.npy').T
     except:
         with open(inp['root'] + 'enk.pkl', 'rb') as g:
             enkb = pkl.load(g)
