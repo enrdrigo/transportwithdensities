@@ -55,9 +55,9 @@ def spcecificheat(root, filename, filename_loglammps, nk, posox, UNITS, enthalpy
         fac = (1.60218e-19) ** 2 / s['Temp'].mean() ** 2 / 1.38e-23 * 6.022e23 / inp['N']
     else:
         raise ValueError('NOT IMPLEMENTED YET')
-    qk = enk - (s['Enthalpy'] - s['TotEng']).mean() / inp['N'] * (n1k + n2k)
+    qk = enk - (s['Enthalpy']).mean() / inp['N'] * (n1k + n2k)
     if enthalpy:
-        q_penthk = enk - (+hm[0] * n1k + hm[1] * n2k - s['TotEng'].mean() / inp['N'] * (n1k + n2k))
+        q_penthk = enk - (+hm[0] * n1k + hm[1] * n2k)
     e_rk = (enk.T - np.mean(enk * (n1k + n2k).conj(), axis=1) / np.mean((n1k + n2k) * (n1k + n2k).conj(), axis=1) * (
                 n1k + n2k).T).T
     cpk = fac * (qk * qk.conj()).mean(axis=1)

@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.linalg import eig
 from . import cubicharmonics
-import logging
 import copy
 import time
 
@@ -38,7 +37,7 @@ def datainit(root, filename, nk):
 
     C = cubicarray(list(grid), pr=False)
 
-    dic, dics = datadicG(data[1], data[2], cubicharmonics.Gvecgenerateall(100)[1:])
+    dic, dics = datadicG(data[1], data[2], cubicharmonics.Gvecgenerateall(nk=nk)[1:])
 
     gplot, dataplot, datasigmaplot = datiplot(C, dic, dics)
 
@@ -80,7 +79,6 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
         ev_maxb.append(max(log_evidence_vP_ / np.array(log_evidence_vP_).sum()))
     index = convergence(ev_maxb, tr=tr)
     if index==None: index=-1
-    #print(index, 'index of the best seebeck prediction')
     print(Npointsb[index], 'optimal N')
     print('opitmalpredictiondataset done in ', time.time()-start)
     if debug:
@@ -88,7 +86,7 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
     return Npointsb[index], predb[index], np.sqrt(spredb[index]), degreeb[index]
 
 
-def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, ifwarning=True, nLbp=0):
+def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, nLbp=0):
     # grid e' la griglia di punti k.
     # data sono i valori calcolati nella simualzione con la std dev dei dati.
     # M e' il grado massimo dei polinomi che considero.
@@ -96,10 +94,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     # alpha e' il parametro di regolarizzazione.
     # x_infer sono i punti k dove voglio inferire il risultato.
     sigma_noise = sdata[1][:N]
-    if ifwarning:
-        logging.warning(str('HO IMPOSTATO A MANO CHE 2\PI/L = 0.20230317263794637'))
     x = grid[:N, :].T
-    #x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     betha = bethapar * (1 / sigma_noise) ** 2
 
@@ -144,7 +139,6 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     betha_vP = []
     g_vP = np.zeros((M_tot))
     x = grid[:N, :].T*k_min/10
-    # x_infer = grid[:N, :].T * 0.13484487571168569
     y_noise = sdata[0][:N]
     Mv_list = []
     sigma_noise = sdata[1][:N]
@@ -158,7 +152,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
         li_vP0, ei_vP = eig(np.dot(Phi_vP, Phi_vP.T))
         # salto quando il determinante della matrice delle armiche cubiche ridotte e' troppo piccolo
         if abs(np.prod(li_vP0)) < 1.0e-100:
-            if ifprintbestfit: print('determinante della martice delle armoniche cubiche minore di 1.0e-5, salto')
+            if ifprintbestfit: print('determinante della martice delle armoniche cubiche minore di 1.0e-100, salto')
             continue
 
         bethap0 = 1
@@ -218,7 +212,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     # calcolo il fit bayesiano per il valore ottimale di alpha e per il grado che massimizza la evidence.
     mN, SN, y_infer, sy_infer, contabest = bayesianpol(grid, sdata, Mv_list[index], N, alpha_vP[index], \
                                                        x_infer, bethapar=betha_vP[index], ifprint=ifprintfinal, \
-                                                       ifwarning=False, nLbp=nLbf)
+                                                        nLbp=nLbf)
 
     if ifprintfinal: print('grado ottimale', 2 * (index + 1), 'grado massimo tentato', 2 * (M_tot - 1))
     if ifprintfinal: print('numero di polinomi nella base ottimale: ', contabest, 'numero di dati', N)
@@ -275,7 +269,6 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
         bethap0 = 1
         alpha0 = 1
         delta_alphaP = 1
-        delta_alphaP = 1
         alphaP = alpha0
         bethaP = bethap0
         conta = 0
@@ -326,7 +319,7 @@ def bestfit(grid, sdata, N, x_infer, ifbetha=False, ifprintbestfit=False, ifprin
     # calcolo il fit bayesiano per il valore ottimale di alpha e per il grado che massimizza la evidence.
     mN, SN, y_infer, sy_infer, contabest = bayesianpol(grid, sdata, Mv_list[index], N, alpha_vP[index], \
                                                        x_infer,bethapar=betha_vP[index], ifprint=ifprintfinal,\
-                                                       ifwarning=False, nLbp=nLbf)
+                                                     nLbp=nLbf)
 
     if ifprintfinal: print('grado ottimale', 2 * (index+1), 'grado massimo tentato', 2 * (M_tot - 1))
     if ifprintfinal: print('numero di polinomi nella base ottimale: ', contabest, 'numero di dati', N)
@@ -431,42 +424,7 @@ def normalize(v, axi):
         return (v.T / norm).T
 
 
-def computephicubicL(x, betha0, M_v, nL=0):
-    Phi_vP = [np.ones((x.shape[1])) * np.sqrt(betha0)]
-    contanumpol = 1
-    PhiL = np.zeros((3, x.shape[1]))
-    PhiL[0] = 1/np.sqrt(4*np.pi)*np.ones(x.shape[1])
-    #PhiL[1] = np.sqrt(5/16/np.pi)*(3 * x[2] ** 2 - (np.linalg.norm(x, axis=0)) ** 2)/(np.linalg.norm(x, axis=0)) ** 2
-    PhiL[1] = np.sqrt(9/256/np.pi)*(35 * (x[0] ** 4 + x[1] ** 4 + x[2] ** 4) - 27 * (np.linalg.norm(x, axis=0)) ** 4)/(np.linalg.norm(x, axis=0)) ** 4
-    for i in range(1, M_v):
 
-        s = cubicharmonics.computecubicar(i, x.T, True)
-        #divido le armoniche cubiche s per r**2i cosi' da avere solo i contributi delle armoniche sferiche e normalizzo, ottengo le nuove armoniche srid
-        sridnorm = s.T / (np.linalg.norm(x, axis=0)) ** (2 * i)
-        srid = copy.copy(sridnorm.T)
-        t = s.T
-        s = copy.copy(t.T)
-        contanumpol += min(s.shape[1], nL+1)
-        test = np.zeros((s.shape[1], nL+1))
-        # In PhiL ci sono le armoniche sferiche normalizzate (in \theta e \phi) (numero di armoniche sferiche: #L),
-        # sto calcolando i prodotti scalari con srid ((#L,#x)(#x, #c)).T-->(#c, #L)
-        PhicoeffL = (PhiL[:nL+1]@srid).T
-        for j in range(nL+1):
-            for q in range(s.shape[1]):
-                test[q, j]=np.sum(srid[:,q]*PhiL[j,:])
-        for j in range(PhicoeffL.shape[1]):
-            pass
-            #print(PhicoeffL[:,j], j)
-        # Contraggo le armoniche cubiche ridotte di grado 2*M_v per la matrice dei coefficienti (#x, #c)(#c, #L)-->(#x, #L)
-        Phirid = (PhiL[:nL+1]*(np.linalg.norm(x, axis=0)) ** (2 * i)).T#((srid@PhicoeffL).T*(np.linalg.norm(x, axis=0)) ** (2 * i)).T
-        for j in range(min(s.shape[1], nL+1)):
-            Phi_vP = np.append(Phi_vP, [Phirid[:, j] * np.sqrt(betha0)], axis=0)
-
-        Phi_vP = np.array(Phi_vP)
-    # contanumpol e' il numero di armoniche cubiche associate a M_v
-    if M_v == 1: Phi_vP = np.array(Phi_vP)
-
-    return Phi_vP, contanumpol
 
 def computephicubichandL(x, betha0, M_v, nL=0):
     Phi_vP = [np.ones((x.shape[1])) * np.sqrt(betha0)]
@@ -498,43 +456,6 @@ def computephicubichandL(x, betha0, M_v, nL=0):
         Phi_vP = np.array(Phi_vP)
     # contanumpol e' il numero di armoniche cubiche associate a M_v
     if M_v == 1: Phi_vP = np.array(Phi_vP)
-
-    return Phi_vP, contanumpol
-
-def computephicubicsfL(x, betha0, M_v, nL=0):
-    Phi_vP = [np.ones((x.shape[1])) * np.sqrt(betha0)]
-    contanumpol = 1
-    theta = np.linspace(0, np.pi, 1000)
-    phi = np.linspace(0, 2*np.pi, 1000)
-    ang = np.array([theta, phi]).T
-    PhiL = np.zeros((3, theta.shape[0]))
-    PhiL[0] = 1 / np.sqrt(4 * np.pi) * np.ones(theta.shape[0])
-    PhiL[1] = np.sqrt(5 / 16 / np.pi) * (3 * np.cos(theta)**2 - 1) * np.sin(theta)
-    PhiL[2] = np.sqrt(9 / 256 / np.pi) * (35 * np.cos(theta)**4 - 30 * np.cos(theta)**2 + 3) * np.sin(theta)
-    for i in range(1, M_v):
-
-        s = cubicharmonics.computecubicar(i, x.T, True)
-        ssf = cubicharmonics.computecubicarangular(i, ang, True)
-        #divido le armoniche cubiche s per r**2i cosi' da avere solo i contributi delle armoniche sferiche e normalizzo, ottengo le nuove armoniche srid
-        contanumpol += min(s.shape[1], nL+1)
-        test = np.zeros((s.shape[1], nL+1))
-        # In PhiL ci sono le armoniche sferiche normalizzate (in \theta e \phi) (numero di armoniche sferiche: #L),
-        # sto calcolando i prodotti scalari con srid ((#L,#x)(#x, #c)).T-->(#c, #L)
-        PhicoeffL = (PhiL[:nL+1]@ssf).T * np.pi/1000*2*np.pi/1000
-        for j in range(nL+1):
-            for q in range(s.shape[1]):
-                test[q, j]=np.sum(ssf[:,q]*PhiL[j,:])* np.pi/1000*2*np.pi/1000
-                print(test[q, j],q, j)
-        for j in range(PhicoeffL.shape[1]):
-            print(PhicoeffL[:,j], j)
-        # Contraggo le armoniche cubiche ridotte di grado 2*M_v per la matrice dei coefficienti (#x, #c)(#c, #L)-->(#x, #L)
-        Phirid = (s@PhicoeffL)
-        for j in range(min(s.shape[1], nL+1)):
-            Phi_vP = np.append(Phi_vP, [Phirid[:, j] * np.sqrt(betha0)], axis=0)
-
-        Phi_vP = np.array(Phi_vP)
-    # contanumpol e' il numero di armoniche cubiche associate a M_v
-    if M_v == 1:Phi_vP = np.array(Phi_vP)
 
     return Phi_vP, contanumpol
 
