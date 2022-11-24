@@ -69,17 +69,17 @@ def getNsnap(dati, Np):
     return nsnap
 
 
-def getinitialize(filename, root, posox, nk, ntry):
+def getinitialize(filename, root, posox, nk, ntry, ifprint=False):
     with open(root+'output.out', 'w+') as f:
         Npart = getNpart(filename, root)
         L, Linf = getBoxboundary(filename, root)
-        print('root: ', root)
-        print('filename: ', filename)
-        print('number of particles: ', Npart)
-        print('size of the box in angstrom: ', L)
-        print('relative distance of the oxy charge: ', posox)
-        print('number of k points: ', nk)
-        print('number of snapshot (if -1 gets all of them): ', ntry)
+        if ifprint: print('root: ', root)
+        if ifprint: print('filename: ', filename)
+        if ifprint: print('number of particles: ', Npart)
+        if ifprint: print('size of the box in angstrom: ', L)
+        if ifprint: print('relative distance of the oxy charge: ', posox)
+        if ifprint: print('number of k points: ', nk)
+        if ifprint: print('number of snapshot (if -1 gets all of them): ', ntry)
         f.write('root: '+'{}\n'.format(root))
         f.write('filename: '+'{}\n'.format(filename))
         f.write('number of particles: '+'{}\n'.format(Npart))
