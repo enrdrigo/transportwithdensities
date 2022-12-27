@@ -54,7 +54,7 @@ def convergence(list, tr=1):
             return i
 
 
-def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
+def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False, frid=10):
     start = time.time()
     N_max = 30
     N_iter = 1
@@ -66,8 +66,12 @@ def opitmalpredictiondataset(root, filename, nk, tr=1, plot=False, debug=False):
     for N in range(2, N_max, N_iter):
 
         try:
-            mN, SN, y_infer_, sy_infer_, spar, log_evidence_vP_, mv = bestfitdevel(root=root, filename=filename, nk=nk, N=N,
-                                                                                   plot=plot)
+            mN, SN, y_infer_, sy_infer_, spar, log_evidence_vP_, mv = bestfitdevel(root=root,
+                                                                                   filename=filename,
+                                                                                   nk=nk,
+                                                                                   N=N,
+                                                                                   plot=plot,
+                                                                                   frid=frid)
         except ValueError:
             print('NOPE')
             continue
