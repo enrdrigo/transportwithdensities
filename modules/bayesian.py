@@ -119,7 +119,7 @@ def bayesianpol(grid, sdata, M, N, alpha,  x_infer, bethapar=1,  ifprint=False, 
     return mN, SN, y_infer, sy_infer, contanumpol
 
 
-def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifprintfinal=False, nLbf=0, plot=False):
+def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifprintfinal=False, nLbf=0, plot=False, frid=10):
     # grid e' la griglia di punti k.
     # sdata sono i valori calcolati nella simualzione con la std dev dei dati.
     # N e' il numero di dati nel fit.
@@ -138,7 +138,7 @@ def bestfitdevel(root, filename, nk, N, ifbetha=False, ifprintbestfit=False, ifp
     alpha_vP = []
     betha_vP = []
     g_vP = np.zeros((M_tot))
-    x = grid[:N, :].T*k_min/10
+    x = grid[:N, :].T*k_min/frid
     y_noise = sdata[0][:N]
     Mv_list = []
     sigma_noise = sdata[1][:N]
