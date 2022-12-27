@@ -76,7 +76,7 @@ def computenlttcepstro_parallel(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1
 
     print('start loop up to nkk')
     with Pool(ncpus) as p:
-        inputs = [(root, Np, L, cp, deltat, tdump, None, i, None, enka, 'low',) for i in range(1, nkk, nskip)]
+        inputs = [(root, Np, L, nk, cp, deltat, tdump, None, i, None, enka, 'low',) for i in range(1, nkk, nskip)]
         result = p.starmap(computenlttcepstro_k, inputs)
 
         return np.array(result)
