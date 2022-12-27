@@ -3,7 +3,7 @@ from scipy import signal
 import pickle as pk
 import os
 from modules import tools
-
+from multiprocessing import Pool
 try:
     import sportran as st
 except ImportError:
@@ -58,6 +58,28 @@ def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp
         wcepstrum.append(tr)
         swcepstrum.append(ertr)
     return np.array(kpoints), np.array(wcepstrum), np.array(swcepstrum)
+
+def computenlttcepstro_parallel(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp=None, enkadata=None, ncpus=2):
+    if enkainp==None:
+        if os.path.exists(root + 'enk.npy'):
+            enka = np.load(root + 'enk.npy')
+            print('data loaded')
+        else:
+            with open(root + 'enk.pkl', 'rb') as f:
+                enk = pk.load(f)
+            print(root + 'enk.pkl' + 'loaded correctly')
+            np.save(root + 'enk.npy', np.array(enk))
+            enk=0 #mi serve per deallocare la memoria dalla ram, trova un modo piu' bello magari...
+            enka=np.load(root + 'enk.npy')
+    else:
+        enka = enkadata
+
+    print('start loop up to nkk')
+    with Pool(ncpus) as p:
+        inputs = [(root, Np, L, cp, deltat, tdump, None, i, None, enka, 'low',) for i in range(1, nkk, nskip)]
+        result = p.starmap(computenlttcepstro_k, inputs)
+
+        return np.array(result)
 
 def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, plot=None, kalone=None, verbose='high'):
     print('START CALCULATION OF D(K)')
