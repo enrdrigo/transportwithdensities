@@ -37,7 +37,8 @@ def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp
     wcepstrum = []
     swcepstrum = []
     print('start loop up to nkk')
-
+    with open(root + 'nlttkcepstral.out', 'w+') as f:
+        pass
     for k in range(1, nkk, nskip):
         kpoint, tr, ertr = computenlttcepstro_k(root=root,
                                                 Np=Np,
@@ -51,6 +52,8 @@ def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp
                                                 plot=None,
                                                 kalone=enka,
                                                 verbose='low')
+        with open(root + 'nlttkcepstral.out', 'a') as f:
+            f.write('{}\t'.format(kpoint * 10) + '{}\t'.format(np.real(tr)) + '{}\n'.format(np.real(ertr)))
         kpoints.append(kpoint)
         wcepstrum.append(tr)
         swcepstrum.append(ertr)
