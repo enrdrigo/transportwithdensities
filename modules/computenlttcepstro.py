@@ -20,16 +20,29 @@ import time
 
 def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp=None, enkadata=None):
     if enkainp==None:
-        if os.path.exists(root + 'enk.npy'):
-            enka = np.load(root + 'enk.npy')
-            print('data loaded')
-        else:
-            with open(root + 'enk.pkl', 'rb') as f:
-                enk = pk.load(f)
-            print(root + 'enk.pkl' + 'loaded correctly')
-            np.save(root + 'enk.npy', np.array(enk))
-            enk=0 #mi serve per deallocare la memoria dalla ram, trova un modo piu' bello magari...
-            enka=np.load(root + 'enk.npy')
+        try:
+            enk = np.load(root + 'enka.npy').T
+            chk = np.load(root + 'chka.npy').T
+            n1k = np.load(root + 'n1ka.npy').T
+            n2k = np.load(root + 'n2ka.npy').T
+        except:
+            with open(root + 'enk.pkl', 'rb') as g:
+                enkb = pk.load(g)
+                enk = np.array(enkb).T
+                enkb = 0
+            with open(root + 'chk.pkl', 'rb') as g:
+                chkb = pk.load(g)
+                chk = np.array(chkb).T
+                chkb = 0
+            with open(root + 'n1k.pkl', 'rb') as g:
+                n1kb = pk.load(g)
+                n1k = np.array(n1kb).T
+                n1kb = 0
+            with open(root + 'n2k.pkl', 'rb') as g:
+                n2kb = pk.load(g)
+                n2k = np.array(n2kb).T
+                n2kb = 0
+        enka = enk - enk[0, :].mean() / Np * (n1k + n2k)
     else:
         enka = enkadata
 
@@ -61,16 +74,29 @@ def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp
 
 def computenlttcepstro_parallel(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp=None, enkadata=None, ncpus=2):
     if enkainp==None:
-        if os.path.exists(root + 'enk.npy'):
-            enka = np.load(root + 'enk.npy')
-            print('data loaded')
-        else:
-            with open(root + 'enk.pkl', 'rb') as f:
-                enk = pk.load(f)
-            print(root + 'enk.pkl' + 'loaded correctly')
-            np.save(root + 'enk.npy', np.array(enk))
-            enk=0 #mi serve per deallocare la memoria dalla ram, trova un modo piu' bello magari...
-            enka=np.load(root + 'enk.npy')
+        try:
+            enk = np.load(root + 'enka.npy').T
+            chk = np.load(root + 'chka.npy').T
+            n1k = np.load(root + 'n1ka.npy').T
+            n2k = np.load(root + 'n2ka.npy').T
+        except:
+            with open(root + 'enk.pkl', 'rb') as g:
+                enkb = pk.load(g)
+                enk = np.array(enkb).T
+                enkb = 0
+            with open(root + 'chk.pkl', 'rb') as g:
+                chkb = pk.load(g)
+                chk = np.array(chkb).T
+                chkb = 0
+            with open(root + 'n1k.pkl', 'rb') as g:
+                n1kb = pk.load(g)
+                n1k = np.array(n1kb).T
+                n1kb = 0
+            with open(root + 'n2k.pkl', 'rb') as g:
+                n2kb = pk.load(g)
+                n2k = np.array(n2kb).T
+                n2kb = 0
+        enka = enk - enk[0,:].mean()/Np*(n1k+n2k)
     else:
         enka = enkadata
 
@@ -84,7 +110,29 @@ def computenlttcepstro_parallel(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1
 def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, plot=None, kalone=None, verbose='high'):
     print('START CALCULATION OF D(K)')
     if kalone is None:
-        enka = np.load(root + 'enk.npy')
+        try:
+            enk = np.load(root + 'enka.npy').T
+            chk = np.load(root + 'chka.npy').T
+            n1k = np.load(root + 'n1ka.npy').T
+            n2k = np.load(root + 'n2ka.npy').T
+        except:
+            with open(root + 'enk.pkl', 'rb') as g:
+                enkb = pk.load(g)
+                enk = np.array(enkb).T
+                enkb = 0
+            with open(root + 'chk.pkl', 'rb') as g:
+                chkb = pk.load(g)
+                chk = np.array(chkb).T
+                chkb = 0
+            with open(root + 'n1k.pkl', 'rb') as g:
+                n1kb = pk.load(g)
+                n1k = np.array(n1kb).T
+                n1kb = 0
+            with open(root + 'n2k.pkl', 'rb') as g:
+                n2kb = pk.load(g)
+                n2k = np.array(n2kb).T
+                n2kb = 0
+        enka = enk - enk[0, :].mean() / Np * (n1k + n2k)
         if verbose=='high':print('list transformed in np.array')
     else:
         enka = kalone
