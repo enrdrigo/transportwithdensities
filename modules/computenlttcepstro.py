@@ -42,7 +42,7 @@ def computenlttcepstro(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1, enkainp
                 n2kb = pk.load(g)
                 n2k = np.array(n2kb).T
                 n2kb = 0
-        enka = (enk - enk[0,:, np.newaxis]/Np*(n1k+n2k)).T
+        enka = (enk - enk[0,:]/Np*(n1k+n2k)).T
     else:
         enka = enkadata
 
@@ -96,7 +96,7 @@ def computenlttcepstro_parallel(root, Np, L, nk, nkk, cp, deltat, tdump, nskip=1
                 n2kb = pk.load(g)
                 n2k = np.array(n2kb).T
                 n2kb = 0
-        enka = (enk - enk[0,:, np.newaxis]/Np*(n1k+n2k)).T
+        enka = (enk - enk[0,:]/Np*(n1k+n2k)).T
     else:
         enka = enkadata
 
@@ -132,7 +132,7 @@ def computenlttcepstro_k(root, Np, L, nk, cp, deltat, tdump, kv=None, nuk=None, 
                 n2kb = pk.load(g)
                 n2k = np.array(n2kb).T
                 n2kb = 0
-        enka = (enk - enk[0,:, np.newaxis]/Np*(n1k+n2k)).T
+        enka = (enk - enk[0,:]/Np*(n1k+n2k)).T
         if verbose=='high':print('list transformed in np.array')
     else:
         enka = kalone
