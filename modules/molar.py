@@ -230,6 +230,168 @@ def molar(root, filename, Np, nblocks):
     print('End molar routine')
     return vb, ub, xb
 
+def molar_multi(root, filename, Np, nblocks, species):
+    start = time.time()
+
+    with open(root + 'molaroutput.out', 'w') as g:
+        g.write('\nStart molar routine')
+        g.write('\nThe routine reads the dump.h5 file with the unscaled atomic positions and energies per atom.\n ' +
+          'Computes the partial volumes (in units of the volume per particle) and the partial energies as described by Pablo Debenedetti. ')
+    print('Start molar routine')
+    print('The routine reads the dump.h5 file with the unscaled atomic positions and energies per atom.\n ' +
+          'Computes the partial volumes (in units of the volume per particle) and the partial energies as described by Pablo Debenedetti.')
+    if os.path.exists(root + 'dump.h5'):
+        pass
+    else:
+        raise ValueError('dump.h5 file not available! create it with the routine read_dump')
+
+    L, L_min = initialize.getBoxboundary(filename,
+                                         root)
+
+    with h5py.File(root + 'dump.h5', 'r') as dump:
+
+        fetta = {'x': 0, 'y': 1, 'z': 2}
+        portions = ['x', 'y', 'z']
+        startr = time.time()
+        snap = [[] for i in range(dump['data'].len())]
+        startr = time.time()
+        energies = np.zeros((len(snap), len(portions)))
+        enmean = np.zeros(len(snap))
+        N = np.zeros((len(species), len(snap), len(portions)))
+        enm = np.zeros((len(species), len(snap), len(portions)))
+        vpp = np.zeros((len(species), len(snap), len(portions)))
+
+        for i in range(1, len(snap) + 1):
+
+            if i % int(len(snap) / 10) == 0:
+                with open(root + 'molaroutput.out', 'a') as g:
+                    g.write('\n'+str((i * 100) // len(snap)) + '% done in {}'.format(time.time()-startr))
+                print((i * 100) // len(snap), '% done in {}'.format(time.time()-startr))
+                startr=time.time()
+
+            j = i - 1
+            dumpdata = dump['data'][j].T
+            enmean[j] = dumpdata[6].sum() + dumpdata[7].sum()
+            pos = wrappos(dumpdata[2:5], L, L_min)
+            posunw = dumpdata[2:5]
+
+            for s in portions:
+
+                sin = portions.index(s)
+                list_fetta = np.where(pos[fetta[s]] < 0.5)
+                energies[j, sin] = dumpdata[6][list_fetta].sum() + dumpdata[7][list_fetta].sum()
+                for idx, ns in enumerate(species):
+                    list_fetta_sp = list_fetta[0][np.where(dumpdata[1][list_fetta] == ns)]
+                    N[idx, j, sin] = len(list_fetta_sp)
+                    enm[idx, j, sin] =(dumpdata[6][list_fetta_sp].sum() + dumpdata[7][list_fetta_sp].sum())/len(list_fetta_sp)
+                    vpp[idx, j, sin] = len(list_fetta_sp)/len(list_fetta)
+
+
+    vb = np.zeros((nblocks, len(portions), len(species)))
+    ub = np.zeros((nblocks, len(portions), len(species)))
+    xb = np.zeros((nblocks, len(portions), len(species)))
+
+    for b in range(nblocks):
+
+        energiesb = np.zeros((int(len(snap) / nblocks), 3))
+        Nb = np.zeros((len(species), int(len(snap) / nblocks), 3))
+
+        energiesb = energies[b * int(len(snap) / nblocks):(b + 1) * int(len(snap) / nblocks), :]
+        Nb = N[:, b * int(len(snap) / nblocks):(b + 1) * int(len(snap) / nblocks)]
+
+        n = Nb.mean(axis=1) #spec x fetta
+        energy = energiesb.mean(axis=0)
+
+        #i, l inidici di specie, m il tempo, n la fetta. Medio su axis=2, quindi sul tempo. delta ha le dimensioni di #specie, #specie, #fetta
+
+        delta = np.einsum('imn,lmn->ilmn',
+                          Nb[:, :, :] - n[:, None, :],
+                          Nb[:, :, :] - n[:, None, :]).mean(axis=2)
+
+        #x ha le dimensioni #fetta, #specie
+        x = (n/n.sum(axis=0)).transpose((1, 0))
+
+        xb[b] = x
+
+        #l indice di tempo, m di fetta, i indice di specie. alpha ha le dimensioni di #fetta, #specie
+        alpha = np.einsum('lm,ilm->mli',
+                          energiesb - energy,
+                          Nb[:, :, :] - n[:, None, :]).mean(axis=1)
+
+
+
+        #la funzione di inversione di matrici permette di fare l'inversione vettoriale di una lista di matrici, l'indice della matrice sara` il primo
+        #ex. (N, M, M). dinv ha le dimensioni, #fetta, #specie, #specie
+        try:
+            dinv = np.linalg.inv(delta.transpose((2, 0, 1)))
+        except:
+            print('probabilmente quello che e` successo e` che nel blocco in una fetta non e` mai cambiato il numero' +
+                  ' di atomi  per una specie. puoi provare a dimunuire il numero di blocchi, cosi` e` piu` probabile' +
+                  ' che almeno in un istante ci sia una fluttuazione. se non migliora allunga la traiettoria o aumenta'+
+                  ' il numero di atomi.')
+            print('block number', b)
+            print('number of particle per species', Nb)
+            raise ValueError('Singular matrix!')
+
+
+        #i inisice di fetta, j indice di specie, k indice di specie.  den ha le dimensioni di #fetta
+        den = np.einsum('ij,ik,ijk->i',
+                        x,
+                        x,
+                        dinv) ** -1
+
+        # partial molar volumes, in unita' di volume per particella
+        #i indice di fetta, l indice di specie. v ha le dimensioni di #fetta, #specie
+        v = np.einsum('il,i->il',
+                      np.einsum('ilm,il->im',# i indice di fetta l indice di specie, m indice di specie, sommo sulle specie
+                                dinv,
+                                x),
+                      den)
+
+        #vb ha le dimensioni di #blocchi, #fetta, #specie
+        vb[b] = v
+
+        # partial molar energies
+        #i indice di fetta, l indice di specie. u ha le dimensioni di #fetta, #specie
+        u = np.einsum('i,il->il', energy / (n.sum(axis=0)), v) + \
+            np.einsum('ab,abc->ac',#a indice di fetta, b indice di specie, c indice di specie
+                      alpha,
+                      dinv - np.einsum('abc,a->abc',#a indice di fetta. b indice di specie, c indice di specie
+                                       np.einsum('ab,abc,ad,adf->acf',#a indice di fetta, b indice di specie, c indice di specie, d indice di specie, f indice di specie
+                                                 x,
+                                                 dinv,
+                                                 x,
+                                                 dinv),
+                                       den))
+
+        #ub ha le dimensioni #blocchi, #fetta, #specie
+        ub[b] = u
+    with open(root + 'molaroutput.out', 'a') as g:
+        g.write('\npartial volumes' +
+          str(vb.mean(axis=1).mean(axis=0)) +
+          ' \n euler relation for the partial volumes:' +
+          str(np.sum(vb.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
+        g.write('\npartial energies' +
+          str(ub.mean(axis=1).mean(axis=0)) +
+          ' \n euler relations for the partial energies:\n' +
+          str(enmean.mean() / Np) +
+          str(np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
+        g.write('\nmean energies per species:' + str(enm.mean(axis=1)))
+        g.write('\nelapsed time: ' + str(time.time() - start))
+        g.write('\nEnd molar routine')
+    print('partial volumes',
+          vb.mean(axis=1).mean(axis=0),
+          ', \n euler relation for the partial volumes:',
+          np.sum(vb.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0))
+    print('partial energies',
+          ub.mean(axis=1).mean(axis=0),
+          ', \n euler relations for the partial energies:',
+          enmean.mean() / Np,
+          np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0))
+    print('mean energies per species:', enm.mean(axis=1))
+    print('elapsed time: ', time.time() - start)
+    print('End molar routine')
+    return vb, ub, xb
 
 def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T

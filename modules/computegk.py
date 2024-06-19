@@ -10,8 +10,7 @@ from multiprocessing import Pool
 import time
 import os
 
-def computecorrflux(root, filename, outname, nk, flux1, flux2, nblock=40, ncpus=40):
-    inp = initialize.getinitialize(filename, root, 0, nk, -1)
+def computecorrflux(root, outname, flux1, flux2, nblock=40, ncpus=40):
     print('DEFAULT: METAL UNITS')
 
     c = np.real(tools.corr_parallel(np.mean(flux1.T, axis=0),
@@ -22,7 +21,7 @@ def computecorrflux(root, filename, outname, nk, flux1, flux2, nblock=40, ncpus=
     np.save(root+outname+'.npy', res)
     return c
 
-def computegkflux(root, filename, outname, nk, flux1, flux2, nblocks=[40], ncpus=40):
+def computegkflux(root, outname, flux1, flux2, nblocks=[40], ncpus=40, redo=False):
 
 
     c = [[] for i in nblocks]
@@ -35,12 +34,12 @@ def computegkflux(root, filename, outname, nk, flux1, flux2, nblocks=[40], ncpus
     for i in range(len(nblocks)):
         nblock = nblocks[i]
 
-        if os.path.exists(root+outname+'.npy'):
+        if os.path.exists(root+outname+'.npy') and not redo:
             res = np.load(root+outname+'.npy', allow_pickle=True).item()
             c[i] = res['correlation function']
             res = 0
         else:
-            c[i] = computecorrflux(root, filename, outname, nk, flux1, flux2, nblock=nblock, ncpus=ncpus)
+            c[i] = computecorrflux(root, outname, flux1, flux2, nblock=nblock, ncpus=ncpus)
 
         tau = len(c[i][0, :])
 
