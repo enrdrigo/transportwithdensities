@@ -376,7 +376,7 @@ def molar_multi(root, filename, Np, nblocks, species):
           ' \n euler relations for the partial energies:\n' +
           str(enmean.mean() / Np) +
           str(np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0)))
-        g.write('\nmean energies per species:' + str(enm.mean(axis=1)))
+        g.write('\nmean energies per species:' + str(enm.mean(axis=(1,2))))
         g.write('\nelapsed time: ' + str(time.time() - start))
         g.write('\nEnd molar routine')
     print('partial volumes',
@@ -388,7 +388,7 @@ def molar_multi(root, filename, Np, nblocks, species):
           ', \n euler relations for the partial energies:',
           enmean.mean() / Np,
           np.sum(ub.mean(axis=1) * xb.mean(axis=1), axis=1).mean(axis=0))
-    print('mean energies per species:', enm.mean(axis=1))
+    print('mean energies per species:', enm.mean(axis=(1,2)))
     print('elapsed time: ', time.time() - start)
     print('End molar routine')
     return vb, ub, xb
@@ -397,7 +397,7 @@ def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T
 
 
-def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='metal'):
+def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='metal', species=[1,2]):
     print('Start molar_enthalpy routine')
     start=time.time()
     volumepp = volume / Np
@@ -419,10 +419,11 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
 
     print(dic_data_log.keys())
 
-    v, u, x = molar(root,
-                 filename,
-                 Np,
-                 nblocks)
+    v, u, x = molar_multi(root,
+                          filename,
+                          Np,
+                          nblocks,
+                          species)
 
     warnings.warn('conversion atm*\AA**3_to_Kcal/mol, lammps real units')
     warnings.warn('conversion bar*\AA**3_to_eV, lammps metal units')
