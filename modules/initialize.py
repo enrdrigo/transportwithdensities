@@ -1,5 +1,5 @@
 import numpy as np
-
+import ase.io
 
 # ----------------------------------------------------------------------------------------------------------------------
 # READS THE DATA FROM THE LAMMPS OUTPUT AND SAVE IT IN A BINARY FORM. IT CAN TAKE VERY LONG.
@@ -44,6 +44,8 @@ def getNpart(filename, root):
 # GETS FROM THE LAMMPS OUTPUT THE DIMENTION OF THE SIDE OF THE SIMULATION BOX
 
 def getBoxboundary(filename, root):
+    print('sto assumendo la cella ortorombica!')
+
     with open(root + filename, 'r') as f:
         oldline = 'noline'
         for i in range(15):
@@ -57,6 +59,16 @@ def getBoxboundary(filename, root):
                 f.close()
                 return np.array([Lmaxx - Linfx, Lmaxy - Linfy, Lmaxz - Linfz]), np.array([Linfx, Linfy, Linfz])
             oldline = line
+
+
+def getBoxboundary_new(filename, root):
+
+    atoms_init = ase.io.read(root + filename, index=slice(0, 1, 1))
+    L_ = np.array(atoms_init[0].get_cell())
+    L_min = atoms_init[0].get_celldisp()[:,0]
+    lenn, V = np.linalg.eig(L_)
+
+    return V, lenn, L_min
 
 
 # ----------------------------------------------------------------------------------------------------------------------

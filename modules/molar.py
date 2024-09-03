@@ -57,6 +57,49 @@ def read_log_lammps(root, filename):
     print('End read_log_lammps routine')
     return datadic
 
+def read_log_gpumd_thermo(root):
+    print('Start read_log_lammps routine')
+    start = time.time()
+    filename = 'thermo.out'
+    print(
+        'Starting the reading for the file '+filename+' with tehrnodynamic quatities like total energy, temperature, pressure or enthalpy. The ouput file is a dictionary saved in '
+        + root + filename +'.npy')
+    datadic = {}
+    if os.path.exists(root + filename + '.npy'):
+        datadic=np.load(root + filename + '.npy', allow_pickle=True).item()
+        return datadic
+
+    with open(root + filename, 'r') as f:
+
+        for index, line in enumerate(f):
+
+            linesplit = []
+
+            for i in line.split(' '):
+
+                if i != '': linesplit.append(i)
+
+            if index==0 and len(linesplit)==18:
+                dickeys = ['T', 'K', 'U', 'Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy', 'ax', 'ay', 'az', 'bx', 'by', 'bz', 'cx', 'cy', 'cz']
+                data = [[] for i in dickeys]
+
+            elif index==0 and len(linesplit)==12:
+                dickeys = ['T', 'K', 'U', 'Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy', 'Lx', 'Ly', 'Lz']
+                data = [[] for i in dickeys]
+
+            for i in range(len(dickeys)):
+                if linesplit[i]=='\n': continue
+                data[i].append(float(linesplit[i]))
+
+        datadic = {dickeys[0]: np.array(data[0])}
+
+        for i in dickeys:
+            datadic[i] = np.array(data[dickeys.index(i)])
+    print('elapsed time: ', time.time() - start)
+    np.save(root + filename + '.npy', datadic)
+    print('End read_log_gpumd_thermo routine')
+    return datadic
+
 
 def molar(root, filename, Np, nblocks):
     start = time.time()
@@ -244,8 +287,11 @@ def molar_multi(root, filename, Np, nblocks, species):
         pass
     else:
         raise ValueError('dump.h5 file not available! create it with the routine read_dump')
-
-    L, L_min = initialize.getBoxboundary(filename,
+    if filename=='dump.xyz':
+        V, L, L_min = initialize.getBoxboundary_new(filename,
+                                             root)
+    else:
+        L, L_min = initialize.getBoxboundary(filename,
                                          root)
 
     with h5py.File(root + 'dump.h5', 'r') as dump:
@@ -272,7 +318,10 @@ def molar_multi(root, filename, Np, nblocks, species):
             j = i - 1
             dumpdata = dump['data'][j].T
             enmean[j] = dumpdata[6].sum() + dumpdata[7].sum()
-            pos = wrappos(dumpdata[2:5], L, L_min)
+            if filename == 'dump.xyz':
+                pos = wrappos_new(dumpdata[2:5], V, L, L_min)
+            else:
+                pos = wrappos(dumpdata[2:5], L, L_min)
             posunw = dumpdata[2:5]
 
             for s in portions:
@@ -396,6 +445,10 @@ def molar_multi(root, filename, Np, nblocks, species):
 def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T
 
+def wrappos_new(posunw, V, L, L_min):
+    pose = (posunw.T - L_min)@V
+    return (np.mod(pose, L) / L).T
+
 
 def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='metal', species=[1,2]):
     print('Start molar_enthalpy routine')
@@ -411,9 +464,22 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     else: pass
     if os.path.exists(root + filename_log + '.npy'):
         dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
+        press = np.mean(dic_data_log['Press'])
     else:
         dic_data_log = read_log_lammps(root=root,
                                     filename=filename_log)
+        press = np.mean(dic_data_log['Press'])
+    if filename_log=='thermo.out':
+        if os.path.exists(root + filename_log + '.npy'):
+            dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
+            press=0
+            for p in ['Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy']:
+                press += np.mean(dic_data_log[p])/6*10000
+        else:
+            dic_data_log = read_log_gpumd_thermo(root=root)
+            press=0
+            for p in ['Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy']:
+                press += np.mean(dic_data_log[p])/6*10000
 
 
 
@@ -433,12 +499,14 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     faclj = 1
     if UNITS == 'metal':
         fac = facmetal
+    if filename=='dump.xyz':
+        fac = facmetal
     if UNITS == 'real':
         fac = facreal
     if UNITS == 'lj':
         fac = faclj
 
-    h = u + np.mean(dic_data_log['Press']) * volumepp * v * fac
+    h = u + press * volumepp * v * fac
 
     eru = u.mean(axis=1).std(axis=0) / u.mean(axis=1).mean(axis=0) / np.sqrt(3 * nblocks)
     print('relative percentage std of the partial eneergies %',

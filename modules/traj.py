@@ -9,6 +9,78 @@ import os
 import logging
 import warnings
 from multiprocessing import Pool
+import ase.io
+
+
+def read_dump_gpumd(root, ntry):
+    if os.path.exists(root + 'dump.h5'):
+        with h5py.File(root + 'dump.h5', 'r') as dump:
+            snap = [[] for i in range(dump['data'].len())]
+
+        lenght = len(snap)
+        print('THE LOADING WAS STOPPED AT THE SNAPSHOT: ', lenght)
+
+    else:
+        dump = h5py.File(root + 'dump.h5', 'a')
+        lenght = 0
+
+    atoms_init = ase.io.read(root + 'dump.xyz', index=slice(0, 1, 1))
+
+    dickeys = list(atoms_init[0].arrays.keys())
+
+    warnings.warn('modifica questa parte per renderla piu` generale')
+
+    print('you dumped this quantities:\n', dickeys)
+
+    print('In order for the code to work I need ',
+          ['id', 'type', 'xu', 'yu', 'zu', 'q', 'c_enp', 'c_enk\n'])
+
+    atoms = ase.io.read(root + 'dump.xyz', index=slice(lenght, ntry, 1))
+
+    if len(atoms) == 0:
+        print('number of total snapshots is', lenght)
+        print('done')
+        print('END READ FILE GOOD')
+        return
+
+    dump = h5py.File(root + 'dump.h5', 'a')
+    d = []
+    start = time.time()
+
+    logging.info(root + 'dump.xyz')
+    logging.info(str(dump.keys()))
+    start0 = time.time()
+
+    for index, atom in enumerate(atoms):
+        if int((index + 1) % 1.0e7) == 0:
+            dump.close()
+            dump = h5py.File(root + 'dump.h5', 'a')
+            logging.info(str(dump['data'].len()))
+            logging.info(str(time.time() - start0))
+            start0 = time.time()
+
+        datisnap = np.zeros((len(atom), 8))
+        datisnap[:, 0] = np.array([i for i in range(len(atom))])
+        datisnap[:, 1] = atom.arrays['numbers']
+        datisnap[:, 2:5] = atom.arrays['positions']
+        datisnap[:, 5] = atom.arrays['numbers']
+        datisnap[:, 6] = atom.arrays['energy_atom']
+        datisnap[:, 7] = (np.linalg.norm(atom.arrays['vel'], axis=1) ** 2 * 0.5 * atoms[0].get_masses() * (
+                    1e10 * 6.24e18 * 1.66e-27))
+
+        if index == 0 and lenght == 0:
+            dump.create_dataset('data', data=datisnap[np.newaxis, :, :], compression="gzip", chunks=True,
+                                maxshape=(None, datisnap.shape[0], datisnap.shape[1]))
+        else:
+            dump['data'].resize((dump['data'].shape[0] + 1), axis=0)
+            dump['data'][-1] = datisnap
+
+    print('number of total snapshots is', lenght + index + 1)
+    print('done')
+    print('elapsed time: ', time.time() - start)
+    print('END READ FILE GOOD')
+    dump.close()
+    return
 
 
 def read_dump(root, filename, Np, ntry):
