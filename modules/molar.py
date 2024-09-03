@@ -469,20 +469,24 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
             dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
             press=0
             for p in ['Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy']:
-                press += np.mean(dic_data_log[p])/6*10000
+                press += dic_data_log[p]/6*10000
+            energy = dic_data_log['U']+dic_data_log['K']
         else:
             dic_data_log = read_log_gpumd_thermo(root=root)
             press=0
             for p in ['Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy']:
-                press += np.mean(dic_data_log[p])/6*10000
+                press += dic_data_log[p]/6*10000
+            energy = dic_data_log['U'] + dic_data_log['K']
     else:
         if os.path.exists(root + filename_log + '.npy'):
             dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
-            press = np.mean(dic_data_log['Press'])
+            press = dic_data_log['Press']
+            energy = dic_data_log['TotEng']
         else:
             dic_data_log = read_log_lammps(root=root,
                                            filename=filename_log)
-            press = np.mean(dic_data_log['Press'])
+            press = dic_data_log['Press']
+            energy = dic_data_log['TotEng']
 
 
 
@@ -509,7 +513,7 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     if UNITS == 'lj':
         fac = faclj
 
-    h = u + press * volumepp * v * fac
+    h = u + press.mean() * volumepp * v * fac
 
     eru = u.mean(axis=1).std(axis=0) / u.mean(axis=1).mean(axis=0) / np.sqrt(3 * nblocks)
     print('relative percentage std of the partial eneergies %',
@@ -519,11 +523,11 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     print('relative percentage std of the partial volumes %',
           errvol * 100)
 
-    errpress = (dic_data_log['Press']).std() / dic_data_log['Press'].mean() / np.sqrt(len(dic_data_log['Press']))
+    errpress = (press).std() / press.mean() / np.sqrt(len(press))
     print('relative percentage std of the pressure %',
-          (dic_data_log['Press']).std() / dic_data_log['Press'].mean() * 100 / np.sqrt(len(dic_data_log['Press'])))
+          (press).std() / press.mean() * 100 / np.sqrt(len(press)))
 
-    PV = (np.mean(dic_data_log['Press']) * volumepp * v * fac).mean(axis=1).mean(axis=0)
+    PV = (press.mean() * volumepp * v * fac).mean(axis=1).mean(axis=0)
     print('PV contribution to the partial enthalpies',
           PV)
 
@@ -531,7 +535,7 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
           h.mean(axis=1).mean(axis=0),
           ',\n Euler relation for the partial enthalpies',
           h.mean(axis=1).mean(axis=0)[0]*x.mean(axis=1).mean(axis=0)[0] + h.mean(axis=1).mean(axis=0)[1] *x.mean(axis=1).mean(axis=0)[1],
-          (np.mean(dic_data_log['TotEng']) + np.mean(dic_data_log['Press']) * volume * fac) / Np)
+          (np.mean(energy) + np.mean(press) * volume * fac) / Np)
 
     print('std partial enthalpies', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
     print('Elapsed time', time.time() - start)
