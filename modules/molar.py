@@ -462,13 +462,8 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
 
         return res['molar enthalpies']
     else: pass
-    if os.path.exists(root + filename_log + '.npy'):
-        dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
-        press = np.mean(dic_data_log['Press'])
-    else:
-        dic_data_log = read_log_lammps(root=root,
-                                    filename=filename_log)
-        press = np.mean(dic_data_log['Press'])
+
+
     if filename_log=='thermo.out':
         if os.path.exists(root + filename_log + '.npy'):
             dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
@@ -480,6 +475,14 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
             press=0
             for p in ['Px', 'Py', 'Pz', 'Pyz', 'Pxz', 'Pxy']:
                 press += np.mean(dic_data_log[p])/6*10000
+    else:
+        if os.path.exists(root + filename_log + '.npy'):
+            dic_data_log = np.load(root + filename_log + '.npy', allow_pickle='TRUE').item()
+            press = np.mean(dic_data_log['Press'])
+        else:
+            dic_data_log = read_log_lammps(root=root,
+                                           filename=filename_log)
+            press = np.mean(dic_data_log['Press'])
 
 
 
