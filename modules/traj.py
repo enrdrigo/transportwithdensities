@@ -2,7 +2,6 @@ import numpy as np
 import pickle as pk
 from modules import compute
 from modules import tools
-from numba import njit
 import time
 import h5py
 import os
@@ -387,7 +386,7 @@ def computekftnumba(root, Np, L, posox, nk, ntry, natpermol):
         return
 
 
-@njit(fastmath=True, parallel=False)
+# njit(fastmath=True, parallel=False)
 def numbacomputekft(f1, f2, x1, x2, L, G, nk):
     fk1 = [np.sum(f1 * np.exp(1j * 2 * np.sum(x1 * -G[i], axis=1) * np.pi)) for i in range(nk)]
     fk2 = [np.sum(f2 * np.exp(1j * 2 * np.sum(x2 * -G[i], axis=1) * np.pi)) for i in range(nk)]

@@ -3,13 +3,13 @@ import pickle as pk
 import matplotlib.pyplot as plt
 import os
 import time
-from numba import njit, jit
+#from numba import njit, jit
 
 # ----------------------------------------------------------------------------------------------------------------------
 # COMPUTES THE POSITION OF THE OXY AND OF THE TWO HYDROGENS AT GIVEN SNAPSHOT. IT ALSO GETS THE POSITION OF THE
 # FOURTH PARTICLE IN THE TIP4P/2005 MODEL OF WATER WHERE THERE IS THE CHARGE OF THE OXY (SEE TIP4P/2005 MODEL OF WATER).
 
-@njit(fastmath=True)
+# njit(fastmath=True)
 def computeposmol(Np, data_array, posox, natpermol):
     nmol = int(Np / natpermol)
     datamol = np.zeros((8, nmol, natpermol))
@@ -61,7 +61,7 @@ def computeposmol(Np, data_array, posox, natpermol):
 # COMPUTES THE MOLECULAR DIPOLES AND THE CENTER OF MASS OF THE MOLECULES AT GIVEN SNAPSHOT. COMPITING THE MOLECULAR
 # DIPOLE WE MUST REMEMBER THAT THE OXY CHARGE IS NOT LOCATED IN THE OXY POSITION (SEE TIP4P/2005 MODEL OF WATER).
 
-@njit(fastmath=True)
+# njit(fastmath=True)
 def computemol(Np, data_array, poschO, pos):
     natpermol = np.shape(pos)[0]
     nmol = int(Np / natpermol)
@@ -146,7 +146,7 @@ def computeat(Np, data_array, poschO, pos):
 
     return ch_at, np.transpose(pos_at)
 
-@njit(fastmath=True)
+# njit(fastmath=True)
 def computeaten(Np, data_array, pos):
     natpermol = np.shape(pos)[0]
     nmol = int(Np / natpermol)
