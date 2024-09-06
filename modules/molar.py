@@ -446,7 +446,7 @@ def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T
 
 def wrappos_new(posunw, V, L, L_min):
-    pose = V@(posunw.T - L_min)
+    pose = (posunw.T - L_min)@V
     return (np.mod(pose, L) / L).T
 
 
