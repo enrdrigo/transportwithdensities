@@ -446,7 +446,7 @@ def wrappos(posunw, L, L_min):
     return (np.mod((posunw.T - L_min), L) / L).T
 
 def wrappos_new(posunw, V, L, L_min):
-    pose = (posunw.T - L_min)@V
+    pose = (posunw.T - L_min)@np.linalg.inv(V)
     return (np.mod(pose, L) / L).T
 
 
@@ -534,7 +534,7 @@ def molar_enthalpy(root, filename, filename_log, volume, Np, nblocks, UNITS='met
     print('partial enthalpies ',
           h.mean(axis=1).mean(axis=0),
           ',\n Euler relation for the partial enthalpies',
-          h.mean(axis=1).mean(axis=0)[0]*x.mean(axis=1).mean(axis=0)[0] + h.mean(axis=1).mean(axis=0)[1] *x.mean(axis=1).mean(axis=0)[1],
+          (h.mean(axis=1)*x.mean(axis=1)).mean(axis=0),
           (np.mean(energy) + np.mean(press) * volume * fac) / Np)
 
     print('std partial enthalpies', np.sqrt((eru)**2+(PV*(errvol+errpress))**2))
